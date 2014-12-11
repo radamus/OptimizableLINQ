@@ -100,12 +100,24 @@ namespace LINQBenchmark
 
         }
 
+        public static void singleResultOriginalWithLet(IEnumerable<Product> products)
+        {
+            TestingEnvironment.ExtendedTest(() => from Product p in products
+                                let maxUnitPrice = (from Product p2 in products select p2.unitPrice).Max()
+                                where maxUnitPrice == p.unitPrice
+                                select p.productName,
+                            ref products,
+                            "Original Max Query Expession with let",
+                            "from Product p in products\n let maxUnitPrice = (from Product p2 in products select p2.unitPrice).Max()\n where maxUnitPrice == p.unitPrice\nselect p.productName"
+                            );
+        }
 
+        // 
         public static void singleResultOriginal(IEnumerable<Product> products)
         {
             TestingEnvironment.ExtendedTest(() => from Product p in products
-                                where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice
-                                select p.productName,
+                                                  where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice
+                                                  select p.productName,
                             ref products,
                             "Original Max Query Expession",
                             "from Product p in products\n where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice\nselect p.productName"
