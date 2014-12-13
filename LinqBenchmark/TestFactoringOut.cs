@@ -32,65 +32,22 @@ namespace LINQBenchmark
                            "from Product p in products\n where (from Product p2 in products where p2.productName == \"Ikura\" select p2.unitPrice).Contains(p.unitPrice)\nselect p.productName"
                            );
 
-/*          Valid only in case of exactly one Ikura in products collection
-            
-            TestingEnvironment.ExtendedTest(() => from prodIkura in products.AsQueryable()
-                                                  where prodIkura.productName == "Ikura"
-                                                  let IkuraPrice = prodIkura.unitPrice
-                                                  from prod in products
-                                                  where prod.unitPrice == IkuraPrice
-                                                  select prod,
-                           ref products,
-                           "KOCHMAN Ikura Query Expession"
-                           );*/
         }
 
         public static void innerQueryTest(IEnumerable<Product> products)
         {
-/*
-            TestingEnvironment.ExtendedTest(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).GroupSelect(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With GroupSelect operator",
-                               "products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).GroupSelect(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
-*/
-            //            ((Func<IEnumerable<double>>) (() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList())).ToEnumerable().
             TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSelectMany operator",
                                "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
-/*
-            TestingEnvironment.ExtendedTest(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Group().SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With GroupSelectMany operator",
-                               "products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Group().SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
 
-            TestingEnvironment.ExtendedTest(() => new List<Func<IEnumerable<double>>>(1) { () => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList() }.Select(uFunc => uFunc()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With newListSelectMany operator",
-                               "new List<Func<IEnumerable<double>>>() { () => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList() }.Select(uFunc => uFunc()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
-*/
         }
 
 
         public static void suspendedInnerQueryTest(IEnumerable<Product> products)
         {
-/*
-            TestingEnvironment.ExtendedTest(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).DelayedGroupSelect(uLazy => products.Where(p => uLazy.Value.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With DelayedGroupSelect operator",
-                               "products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).DelayedGroupSelect(uLazy => products.Where(p => uLazy.Value.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
 
-            TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsDelayedGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uLazy => products.Where(p => uLazy.Value.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With AsDelayedGroupSelectMany operator",
-                               "OptimizerExtensions.AsDelayedGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uLazy => products.Where(p => uLazy.Value.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
-*/
             TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroupSuspended(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator",
@@ -126,14 +83,6 @@ namespace LINQBenchmark
 
         public static void singleResultTest(IEnumerable<Product> products)
         {
-/*          GroupSelect Variant for single results is globally inefficient due to "uEnumerable.First()" 
-    * 
-            TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).GroupSelect(uEnumerable => products.Where(p => uEnumerable.First() == p.unitPrice).Select(p => p.productName)),
-                                ref products,
-                                "Optimized Max With GroupSelect operator",
-                                "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).GroupSelect(uEnumerable => products.Where(p => uEnumerable.First() == p.unitPrice).Select(p => p.productName))"
-                                );
-*/
             TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)),
                                ref products,
                                "Optimized Max With AsGroupSelectMany operator",
@@ -157,31 +106,11 @@ namespace LINQBenchmark
 
         public static void suspendedSingleResultTest(IEnumerable<Product> products)
         {
-            /*          DelayedGroupSelect Variant for single results is globally inefficient due to "uEnumerable.First()" 
-            * 
-                        TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).DelayedGroupSelect(uLazy => products.Where(p => uLazy.Value.First() == p.unitPrice).Select(p => p.productName)),
-                                           ref products,
-                                           "Optimized Max With DelayedGroupSelect operator",
-                                           "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).DelayedGroupSelect(uLazy => products.Where(p => uLazy.Value.First() == p.unitPrice).Select(p => p.productName))"
-                                           );
-            
-            TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsDelayedGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxLazy => products.Where(p => uMaxLazy.Value == p.unitPrice).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Max With AsDelayedGroupSelectMany operator",
-                               "OptimizerExtensions.AsDelayedGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxLazy => products.Where(p => uMaxLazy.Value == p.unitPrice).Select(p => p.productName))"
-                               );
-            */
             TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)),
                                ref products,
                                "Optimized Max With AsGroupSuspendedSelectMany operator",
                                "OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName))"
                                );
-
-            TestingEnvironment.ExtendedTest(() => OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).First(),
-                   ref products,
-                   "Optimized Max With AsGroupSuspendedSelectFirst operator",
-                   "OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).First()"
-                   );
 
         }
 
@@ -220,15 +149,6 @@ namespace LINQBenchmark
 
         public static void simplerExpressionOriginal(IEnumerable<Product> products)
         {
-/*
-            TestingEnvironment.ExtendedTest(() => from Product p in products
-                                                  where (from Product p2 in products where p2.unitPrice == p.unitPrice / 1.2 select p2).Count() == 1
-                                                  select p.productName,
-                            ref products,
-                            "Original simpler Query Expession",
-                            "from Product p in products\n where (from Product p2 in products where p2.unitPrice == p.unitPrice / 1.2 select p2).Count() > 0\nselect p.productName"
-                            );
-*/
             TestingEnvironment.ExtendedTest(() => products.Where(p => products.Where(p2 => p2.unitPrice == p.unitPrice / 1.2).Count() == 1).Select(p => p.productName),
                             ref products,
                             "Original simpler Lambda Expession",
@@ -254,6 +174,7 @@ namespace LINQBenchmark
                                "products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10)).Count() == 1).Select(p => p.productName)"
                                );
 
+            // Permissible variant, because First() is deferred (within lambda). 
             TestingEnvironment.ExtendedTest(() => products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10)).First().Count() == 1).Select(p => p.productName),
                    ref products,
                    "Optimized simpler With AsGroupSelectFirst operator",
@@ -272,6 +193,7 @@ namespace LINQBenchmark
                                "products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).Count() == 1).Select(p => p.productName)"
                                );
 
+            // Permissible variant, because First() is deferred (within lambda).
             TestingEnvironment.ExtendedTest(() => products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).First().Count() == 1).Select(p => p.productName),
                                ref products,
                                "Optimized simpler With AsGroupSuspendedSelectFirst operator",
