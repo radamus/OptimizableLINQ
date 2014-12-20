@@ -63,8 +63,8 @@ namespace LINQPerfTest
 
 
 
-    //   Samples.testExprTree();
-       SbqlTests.TestSBQL();
+       Samples.testExprTree();
+    //   SbqlTests.TestSBQL();
             
    //      EnumerableExtensions.test();
        Trace.Unindent();

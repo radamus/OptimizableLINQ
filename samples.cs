@@ -23,8 +23,12 @@ namespace LINQConverters
         static Stopwatch watch = new Stopwatch();
         public static void Compare<TSource, TResult>(this IEnumerable<TSource> source, Func<IQueryable<TSource>, Expression> expr, Func<IEnumerable<TSource>, TResult> evalOriginal, Func<IEnumerable<TSource>, TResult> evalOptimized)
         {
-            Trace.WriteLine("query");            
-            Trace.WriteLine(expr(source.AsQueryable()).ToString());
+            Trace.WriteLine("query");
+            watch.Restart();
+            var finalQuery = expr(source.AsQueryable());
+            watch.Stop();
+            Trace.WriteLine("Optimisation time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine(finalQuery.ToString());
             startTime = DateTime.Now;
             watch.Restart();
             var q = evalOriginal(source);

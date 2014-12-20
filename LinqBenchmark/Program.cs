@@ -12,7 +12,7 @@ namespace LINQBenchmark
 
     class Program
     {
-        public const bool EVALUATE_ORIGINALS = true;
+        public const bool EVALUATE_ORIGINALS = false;
 
         public static IEnumerable<Product> products;
 
@@ -50,19 +50,24 @@ namespace LINQBenchmark
 
         static void Main(string[] args)
         {
+//            NessosBench.Go();
+            
             Console.WriteLine("Is StopWatch resolution high: {0}", System.Diagnostics.Stopwatch.IsHighResolution);
             TestingEnvironment.InitProducts(ref products);
-            SimplestTestingTest();
+//            SimplestTestingTest();
 //            TempTest();
 
 
+
+            TestFactoringOut.innerQueryWithPLINQ(products);
+            TestFactoringOut.innerQueryWithLinqOptimizerTest(products);
             if (EVALUATE_ORIGINALS)
                 TestFactoringOut.innerQueryOriginal(products);
             TestFactoringOut.innerQueryTest(products);
             TestFactoringOut.suspendedInnerQueryTest(products);
 //            TestFactoringOut.innerQueryGroupByTest(products);
 
-            if (EVALUATE_ORIGINALS)
+/*           if (EVALUATE_ORIGINALS)
                 TestFactoringOut.singleResultOriginal(products);           
             TestFactoringOut.singleResultTest(products);
             TestFactoringOut.suspendedSingleResultTest(products);

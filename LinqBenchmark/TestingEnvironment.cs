@@ -27,6 +27,7 @@ namespace LINQBenchmark
             watch.Start();
             ICollection<Product> productsCol = new List<Product>();
             SimpleGenerator.fillProducts(ref productsCol);
+            //SimpleExtendedGenerator.fillProducts(ref productsCol, 100000);
             //var products = productsCol.AsQueryable();
             watch.Stop();
             if (VERBOSE)
@@ -65,6 +66,38 @@ namespace LINQBenchmark
                     Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
             }
         }
+
+        public static void SimpleTest(Func<IEnumerable> enumFunc, int sourceCount, String description = null, String queryString = null)
+        {
+            if (description != null)
+                Console.WriteLine("* * * * * " + description);
+            else
+                Console.WriteLine("* * * * *");
+            if (VERBOSE && queryString != null)
+                Console.WriteLine("Query: " + queryString);
+
+            if (VERBOSE)
+                Console.WriteLine("Query result count for a full source ({0} elements) : {1}", sourceCount, enumFunc().Count());
+            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, EnumFuncFuncTester.Test(enumFunc, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
+
+        }
+
+        public static void ExtendedTest<TSource>(Func<Func<IEnumerable>> enumFuncFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
+        {
+            SimpleTest(enumFuncFunc(), source.Count(), description, queryString);
+
+            if (!NOEXTENDED_TESTS)
+            {
+
+                ICollection<SizeVsTimeStats> statsList = EnumFuncFuncTester.AutoSizeVsTimeTest(enumFuncFunc, ref source, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
+                statsList = statsList.Concat(EnumFuncFuncTester.AutoSizeVsTimeTest(enumFuncFunc, ref source, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+
+                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
+                if (PRINT_CSV)
+                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
+            }
+        }
+
 
     }
 }
