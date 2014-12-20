@@ -27,7 +27,7 @@ namespace LINQBenchmark
             watch.Start();
             ICollection<Product> productsCol = new List<Product>();
             SimpleGenerator.fillProducts(ref productsCol);
-            //SimpleExtendedGenerator.fillProducts(ref productsCol, 100000);
+            SimpleExtendedGenerator.fillProducts(ref productsCol, 1000000);
             //var products = productsCol.AsQueryable();
             watch.Stop();
             if (VERBOSE)
@@ -67,6 +67,22 @@ namespace LINQBenchmark
             }
         }
 
+        public static void ExtendedIntTest(Func<IEnumerable> queryFunc, ref int count, String description = null, String queryString = null)
+        {
+            SimpleTest(queryFunc(), count, description, queryString);
+
+            if (!NOEXTENDED_TESTS)
+            {
+
+                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeIntTest(queryFunc, ref count, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
+                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeIntTest(queryFunc, ref count, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+
+                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
+                if (PRINT_CSV)
+                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
+            }
+        }
+
         public static void SimpleTest(Func<IEnumerable> enumFunc, int sourceCount, String description = null, String queryString = null)
         {
             if (description != null)
@@ -98,6 +114,20 @@ namespace LINQBenchmark
             }
         }
 
+        public static void ExtendedIntTest(Func<Func<IEnumerable>> enumFuncFunc, ref int count, String description = null, String queryString = null)
+        {
+            SimpleTest(enumFuncFunc(), count, description, queryString);
 
+            if (!NOEXTENDED_TESTS)
+            {
+
+                ICollection<SizeVsTimeStats> statsList = EnumFuncFuncTester.AutoSizeVsTimeIntTest(enumFuncFunc, ref count, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
+                statsList = statsList.Concat(EnumFuncFuncTester.AutoSizeVsTimeIntTest(enumFuncFunc, ref count, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+
+                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
+                if (PRINT_CSV)
+                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
+            }
+        }
     }
 }

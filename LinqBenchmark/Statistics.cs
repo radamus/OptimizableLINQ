@@ -74,7 +74,7 @@ namespace LINQBenchmark
             return res.ToString();
         }
 
-        private const String formatString = "{0, -10}{1, -10}{2, -10}{3, -10}{4, -15}";
+        private const String formatString = "{0, -11}{1, -10}{2, -13}{3, -13}{4, -15}";
 
         public static String FormattedSizeVsTimeStatsCollection(ICollection<SizeVsTimeStats> stats)
         {

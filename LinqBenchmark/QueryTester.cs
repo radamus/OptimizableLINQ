@@ -66,6 +66,28 @@ namespace LINQBenchmark
             return stats;
         }
 
+        public static SizeVsTimeStats TestReducedInt(Func<IEnumerable> queryFunc, ref int count, int reducedCount, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
+        {
+            int orgCount = count;
+            count = reducedCount;
+            SizeVsTimeStats stats = new SizeVsTimeStats(reducedCount, queryFunc().Count(), Test(queryFunc(), noOfRepeats, maxTestTimeMsec, minTestTimeMsec));
+            count = orgCount;
+            return stats;
+        }
+
+        public static ICollection<SizeVsTimeStats> AutoSizeVsTimeIntTest(Func<IEnumerable> queryFunc, ref int count, int ratio = 2, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
+        {
+            ICollection<SizeVsTimeStats> stats = new List<SizeVsTimeStats>();
+            int srcCount = 1;
+            while (srcCount <= count)
+            {
+                stats.Add(TestReducedInt(queryFunc, ref count, srcCount, noOfRepeats, maxTestTimeMsec, minTestTimeMsec));
+                srcCount *= ratio;
+            }
+
+            return stats;
+        }
+
     }
 
     public class EnumFuncFuncTester
@@ -122,6 +144,30 @@ namespace LINQBenchmark
 
             return stats;
         }
+
+        public static SizeVsTimeStats TestReducedInt(Func<Func<IEnumerable>> enumFuncFunc, ref int count, int reducedCount, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
+        {
+            int orgCount = count;
+            count = reducedCount;
+            SizeVsTimeStats stats = new SizeVsTimeStats(reducedCount, enumFuncFunc()().Count(), Test(enumFuncFunc(), noOfRepeats, maxTestTimeMsec, minTestTimeMsec));
+            count = orgCount;
+            return stats;
+        }
+
+
+        public static ICollection<SizeVsTimeStats> AutoSizeVsTimeIntTest(Func<Func<IEnumerable>> enumFuncFunc, ref int count, int ratio = 2, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
+        {
+            ICollection<SizeVsTimeStats> stats = new List<SizeVsTimeStats>();
+            int srcCount = 1;
+            while (srcCount <= count)
+            {
+                stats.Add(TestReducedInt(enumFuncFunc, ref count, srcCount, noOfRepeats, maxTestTimeMsec, minTestTimeMsec));
+                srcCount *= ratio;
+            }
+
+            return stats;
+        }
+
 
     }
 

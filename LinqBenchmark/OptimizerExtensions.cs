@@ -66,7 +66,7 @@ namespace LINQOptimizer
         //The best...
         public static IEnumerable<Lazy<TSource>> AsGroupSuspendedThreadSafe<TSource>(this Func<TSource> sourceFunc)
         {
-            yield return new Lazy<TSource>(() => sourceFunc());
+            yield return new Lazy<TSource>(sourceFunc);
         }
 
 /*        public static IEnumerable<Lazy<TSource>> AsGroupSuspended<TSource>(this Func<TSource> sourceFunc)
