@@ -61,7 +61,7 @@ namespace LINQBenchmark
 //            TempTest();
 
             nessosFactoringOutTests(10000);
-//            FactoringOutTests();
+            FactoringOutTests();
 //            FactoringOutTests();
 
 /**/
