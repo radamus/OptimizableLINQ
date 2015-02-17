@@ -7,7 +7,7 @@
     <ProjectGuid>{0E1B28DD-1B94-4FA7-911B-9FF50552841C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LINQBenchmark</RootNamespace>
+    <RootNamespace>OptimisableLINQBenchmark</RootNamespace>
     <AssemblyName>LINQBenchmark</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -51,11 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data.cs" />
-    <Compile Include="DataExt.cs" />
     <Compile Include="NessosBench.cs" />
-    <Compile Include="OptimizerExtensions.cs" />
-    <Compile Include="Product.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryTester.cs" />
@@ -66,6 +62,16 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\Extensions.csproj">
+      <Project>{05eea992-8800-4cf6-af9c-5aff99f85421}</Project>
+      <Name>Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestData\TestData.csproj">
+      <Project>{4a4c93d7-b342-4e01-a729-631a3ced107e}</Project>
+      <Name>TestData</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

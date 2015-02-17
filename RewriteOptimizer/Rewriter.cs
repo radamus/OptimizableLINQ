@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Reflection;
 
-namespace Optimizer
+namespace OptimisableLINQ
 {
     using SBQL.Environment;
     using LinqInfo;

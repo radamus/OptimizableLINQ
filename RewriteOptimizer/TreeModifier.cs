@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace Optimizer
+namespace OptimisableLINQ
 {
     using TypeHelpers;
     internal class TreeModifier : ExpressionVisitor

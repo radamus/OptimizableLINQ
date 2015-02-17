@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using LINQOptimizer;
+using OptimisableLINQ;
 
-namespace LINQBenchmark
+namespace OptimisableLINQBenchmark
 {
 
     public class QueryTester

@@ -11,8 +11,9 @@ namespace LINQConverters
     using LINQPerfTest;
 
     using TypeHelpers;
-    using Optimizer;
-    using TestData;
+    using OptimisableLINQ;
+    using SampleData;
+
     static class Samples
     {
         static ICollection<Product> sproducts = new List<Product>();
@@ -31,7 +32,7 @@ namespace LINQConverters
             watch.Restart();
             var q = evalOriginal(source);
             watch.Stop();
-            Trace.WriteLine("Zapytanie niezoptymalizowane stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + "), zegar: " + (DateTime.Now - startTime).TotalMilliseconds);
+            Trace.WriteLine("Unoptimised query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + "), zegar: " + (DateTime.Now - startTime).TotalMilliseconds);
             Trace.WriteLine(q);
             Trace.WriteLine("\noptimized query");
             Trace.WriteLine(expr(source.AsOptimizable()).ToString());
@@ -39,7 +40,7 @@ namespace LINQConverters
             watch.Restart();
             var q1 = evalOptimized(source);
             watch.Stop();
-            Trace.WriteLine("Zapytanie zoptymalizowane  stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + "), zegar: " + (DateTime.Now - startTime).TotalMilliseconds);
+            Trace.WriteLine("Optimisted query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + "), zegar: " + (DateTime.Now - startTime).TotalMilliseconds);
 
             
             Trace.WriteLine(q1);
@@ -50,10 +51,12 @@ namespace LINQConverters
             
             watch.Start();
             ICollection<Product> lproducts = new List<Product>();
-            Data.fillProducts(ref lproducts);
+            SimpleGenerator.fillProducts(ref lproducts);
+            SimpleExtendedGenerator.fillProducts(ref lproducts, 1000);
 
             ICollection<Product> rproducts = new List<Product>();
-            Data.fillProducts(ref rproducts);
+            SimpleGenerator.fillProducts(ref rproducts);
+            SimpleExtendedGenerator.fillProducts(ref rproducts, 1000);
 
             IQueryable<Product> products = lproducts.AsQueryable();
             IQueryable<Product> products1 = rproducts.AsQueryable();

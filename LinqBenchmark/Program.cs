@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LINQBenchmark
+namespace OptimisableLINQBenchmark
 {
 
-    using LINQSampleData;
+    using SampleData;
 
     class Program
     {
@@ -60,7 +60,7 @@ namespace LINQBenchmark
             SimplestTestingTest();
 //            TempTest();
 
-            nessosFactoringOutTests(10000);
+            nessosFactoringOutTests(1000);
             FactoringOutTests();
 //            FactoringOutTests();
 

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQPerfTest", "LINQPerfTest.csproj", "{DAF853FC-DE8E-41D2-A4E2-A9CC5D0CAF55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSimple", "TestSimple.csproj", "{DAF853FC-DE8E-41D2-A4E2-A9CC5D0CAF55}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "Extensions\Extensions.csproj", "{05EEA992-8800-4CF6-AF9C-5AFF99F85421}"
 EndProject

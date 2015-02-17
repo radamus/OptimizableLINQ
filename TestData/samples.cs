@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TestData
+namespace SampleData
 {
     class samples
     {
         void foo()
         {
             ICollection<Product> lproducts = new List<Product>();
-            Data.fillProducts(ref lproducts);
+            SimpleGenerator.fillProducts(ref lproducts);
             IQueryable<Product> products = lproducts.AsQueryable();
             var maxIkuraUnitPrice = calculateMaxUnitPrice(products, "IKura");
             var minTofuUnitPrice = calculateMinUnitPrice(products, "Tofu");

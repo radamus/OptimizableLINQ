@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Diagnostics;
 
-namespace Optimizer
+namespace OptimisableLINQ
 {
     using TypeHelpers;
     class TreeNodeReplacer

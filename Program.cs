@@ -8,8 +8,8 @@ using System.Diagnostics;
 namespace LINQPerfTest
 {
     using LINQConverters;
-    using TestData;
-    using Optimizer;
+    using SampleData;
+    using OptimisableLINQ;
     using System.IO;
     
     class Program
