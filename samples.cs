@@ -9,9 +9,7 @@ using System.Diagnostics;
 namespace LINQConverters
 {
     using LINQPerfTest;
-    using LINQ_SBQLConverters;
-    
-    using SBQL.Expressions;
+
     using TypeHelpers;
     using Optimizer;
     using TestData;
