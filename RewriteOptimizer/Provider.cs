@@ -44,7 +44,9 @@ namespace OptimisableLINQ
             {
                 return wrappedProvider.Execute<TResult>(result);
             }
+            
             Func<TResult> func = Expression.Lambda<Func<TResult>>(result).Compile();
+            
             return func();
 
         }
@@ -89,10 +91,10 @@ namespace OptimisableLINQ
 
         OptimizerProvider provider;
         public Type ElementType { get { return typeof(TData); } }
-        public Expression Expression { get { Expression expr =  expression == null ? queryable.Expression : expression; return new Rewriter().Optimize(expr); } private set { expression = value; } }
+        public Expression Expression { get { Expression expr =  expression == null ? queryable.Expression : expression; return expr; } private set { expression = value; } }
         public IQueryProvider Provider { get { return provider; } }
 
-
+        IEnumerable<TData> enumerable;
 
         internal OptimizableQueryable(IQueryable<TData> queryable)
         {
@@ -112,14 +114,20 @@ namespace OptimisableLINQ
 
         IEnumerator<TData> IEnumerable<TData>.GetEnumerator()
         {
-            return (Provider.Execute<IEnumerable<TData>>(Expression)).GetEnumerator();
+            return this.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return (Provider.Execute<System.Collections.IEnumerable>(Expression)).GetEnumerator();
+            return this.GetEnumerator();
         }
 
+        IEnumerator<TData> GetEnumerator() {
+            if (enumerable == null) 
+                enumerable = Provider.Execute<IEnumerable<TData>>(Expression);
+            
+            return enumerable.GetEnumerator();
+        }
 
     }
 }
