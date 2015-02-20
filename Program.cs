@@ -9,7 +9,7 @@ namespace LINQPerfTest
 {
     using LINQConverters;
     using SampleData;
-    using OptimisableLINQ;
+    using OptimizableLINQ;
     using System.IO;
     
     class Program

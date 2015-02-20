@@ -5,19 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OptimisableLINQ;
+using OptimizableLINQ;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
-    using OptimisableLINQ;
+    using OptimizableLINQ;
 
-    public class OptimisationTester
+    public class OptimizationTester
     {
 
         private static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         private static List<double> timeList = new List<double>();
 
-        public static TimeStats TestOverheadTime<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source, OptimisationApplicator applicator, int noOfRepeats = 11)
+        public static TimeStats TestOverheadTime<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source, OptimizationApplicator applicator, int noOfRepeats = 11)
         {
             timeList.Clear();
 

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using Nessos.LinqOptimizer.CSharp;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
     class NessosBench
     {

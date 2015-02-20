@@ -11,7 +11,7 @@ namespace LINQConverters
     using LINQPerfTest;
 
     using TypeHelpers;
-    using OptimisableLINQ;
+    using OptimizableLINQ;
     using SampleData;
 
     static class Samples
@@ -37,13 +37,13 @@ namespace LINQConverters
             watch.Restart();
             var q = orgQuery.Count();
             watch.Stop();
-            Trace.WriteLine("*** Unoptimised query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("*** Unoptimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q);
 
             watch.Restart();
             q = orgQuery.Count();
             watch.Stop();
-            Trace.WriteLine("*** 2nd run: Unoptimised query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("*** 2nd run: Unoptimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q);
 
             var warmingup2 = expr(source.AsOptimizable()).GetEnumerator();
@@ -52,7 +52,7 @@ namespace LINQConverters
             var optQuery = expr(source.AsOptimizable());
             optQuery.GetEnumerator();
             watch.Stop();
-            Trace.WriteLine("\n** Query optimisation instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")\n");
+            Trace.WriteLine("\n** Query optimization instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")\n");
             Trace.WriteLine("\nOptimized query:\n");
             Trace.WriteLine(new Rewriter().Optimize(orgQuery.Expression).ToString());
 
@@ -81,7 +81,7 @@ namespace LINQConverters
                       Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
             xoptQuery.GetEnumerator();
             watch.Stop();
-            Trace.WriteLine("* Warmup query optimisation instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("* Warmup query optimization instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
 
             watch.Restart();
             var orgQuery = lproducts.Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
@@ -132,22 +132,14 @@ namespace LINQConverters
                   Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, p => lproducts.
                       Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
             watch.Stop();
-            Trace.WriteLine("* Optimisable instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("* Optimizable instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
 
             watch.Restart();
             optQuery = lproducts.AsOptimizable().Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
                   Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, p => lproducts.
                       Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
             watch.Stop();
-            Trace.WriteLine("* 2nd run: Optimisable instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
-
-            watch.Restart();
-            optQuery = lproducts.AsOptimizable().Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
-                  Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, p => lproducts.
-                      Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
-            optQuery.GetEnumerator();
-            watch.Stop();
-            Trace.WriteLine("* Query optimisation instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("* 2nd run: Optimizable instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
 
             watch.Restart();
             optQuery = lproducts.AsOptimizable().Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
@@ -155,7 +147,15 @@ namespace LINQConverters
                       Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
             optQuery.GetEnumerator();
             watch.Stop();
-            Trace.WriteLine("* 2nd run: Query optimisation instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+            Trace.WriteLine("* Query optimization instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
+
+            watch.Restart();
+            optQuery = lproducts.AsOptimizable().Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
+                  Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, p => lproducts.
+                      Where(p1 => p1.productName == "Tofu").Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, (p, s) => p.productName);
+            optQuery.GetEnumerator();
+            watch.Stop();
+            Trace.WriteLine("* 2nd run: Query optimization instruction time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
 
         }
 

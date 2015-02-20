@@ -7,7 +7,7 @@
     <ProjectGuid>{0E1B28DD-1B94-4FA7-911B-9FF50552841C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OptimisableLINQBenchmark</RootNamespace>
+    <RootNamespace>OptimizableLINQBenchmark</RootNamespace>
     <AssemblyName>LINQBenchmark</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -53,8 +53,8 @@
   <ItemGroup>
     <Compile Include="DataReducer.cs" />
     <Compile Include="NessosBench.cs" />
-    <Compile Include="OptimisationFramework.cs" />
-    <Compile Include="OptimisationTester.cs" />
+    <Compile Include="OptimizationFramework.cs" />
+    <Compile Include="OptimizationTester.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryExecutor.cs" />

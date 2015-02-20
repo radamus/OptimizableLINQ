@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
     public interface IQuerySourceCardinalityManagement<TConf>
     {

@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
 
     using SampleData;
-    using OptimisableLINQ;
+    using OptimizableLINQ;
 
     class Program
     {
@@ -22,9 +22,14 @@ namespace OptimisableLINQBenchmark
         {
             TestingEnvironment.SimpleTest(products, products.Count(), "List of all products");
 
-            TimeStats stats = OptimisationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizableLINQApplicator());
+            TimeStats stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizableLINQApplicator());
+            Console.WriteLine("Optimization time: {0} msec", stats.medianTimeMsec);
 
-            Console.WriteLine("Optimisation time: {0} msec" + Environment.NewLine, stats.medianTimeMsec);
+            stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new OptimizableLINQApplicator(), new ParallelLINQApplicator()));
+            Console.WriteLine("Optimization time: {0} msec", stats.medianTimeMsec);
+
+            stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()));
+            Console.WriteLine("Optimization time: {0} msec" + Environment.NewLine, stats.medianTimeMsec);
         }
 
         static void Main(string[] args)

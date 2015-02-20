@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
     using SampleData;
-    using OptimisableLINQ;
+    using OptimizableLINQ;
 
     public static class TestingEnvironment
     {

@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Nessos.LinqOptimizer.CSharp;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
     using SampleData;
-    using OptimisableLINQ;
+    using OptimizableLINQ;
 
     public static class TestFactoringOut
     {

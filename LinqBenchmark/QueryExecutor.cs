@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Linq;
 using System.Text;
-using OptimisableLINQ;
+using OptimizableLINQ;
 
-namespace OptimisableLINQBenchmark
+namespace OptimizableLINQBenchmark
 {
     public interface IQueryExecutor<TQuery>
     {
