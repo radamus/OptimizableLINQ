@@ -16,7 +16,7 @@ namespace OptimisableLINQBenchmark
         int ResultCRC(TQuery query);
     }
 
-    public class EnumerableQueryExecutor : IQueryExecutor<IEnumerable>
+    public class DeferredEnumerableQueryExecutor : IQueryExecutor<IEnumerable>
     {
         public void Prepare(ref IEnumerable query)
         {

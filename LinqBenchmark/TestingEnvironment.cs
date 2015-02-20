@@ -12,6 +12,7 @@ namespace OptimisableLINQBenchmark
 
     public static class TestingEnvironment
     {
+        public const bool EXTENDED_DATA = false;
         public const bool NOEXTENDED_TESTS = false;
         public const bool PRINT_CSV = false;
         public const bool VERBOSE = true;
@@ -27,8 +28,9 @@ namespace OptimisableLINQBenchmark
             watch.Start();
             ICollection<Product> productsCol = new List<Product>();
             SimpleGenerator.fillProducts(ref productsCol);
-            SimpleExtendedGenerator.fillProducts(ref productsCol, 1000000);
-            //var products = productsCol.AsQueryable();
+            if (EXTENDED_DATA)
+                SimpleExtendedGenerator.fillProducts(ref productsCol, 1000000);
+            
             watch.Stop();
             if (VERBOSE)
                 Console.WriteLine("Collection of {0} products loading time (StopWatch): {1} msec ({2})" + Environment.NewLine,
@@ -53,7 +55,7 @@ namespace OptimisableLINQBenchmark
 
         public static void SimpleTest(IEnumerable query, int sourceCount, String description = null, String queryString = null)
         {
-            SimpleTest(query, new EnumerableQueryExecutor(), sourceCount, description, queryString);
+            SimpleTest(query, new DeferredEnumerableQueryExecutor(), sourceCount, description, queryString);
         }
 
         public static void ExtendedTest<TCardConf, TQuery>(Func<TQuery> query, IQueryExecutor<TQuery> executor, ref TCardConf cardConfigurator, IQuerySourceCardinalityManagement<TCardConf> cardManager, String description = null, String queryString = null)
@@ -62,9 +64,9 @@ namespace OptimisableLINQBenchmark
 
             if (!NOEXTENDED_TESTS)
             {
-
-                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+                //TODO: Add safe support for minCount = 0
+                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 1, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
+                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 10, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
 
                 Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
                 if (PRINT_CSV)
@@ -75,12 +77,12 @@ namespace OptimisableLINQBenchmark
 
         public static void ExtendedTest<TSource>(Func<IEnumerable> queryFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
         {
-            ExtendedTest(queryFunc, new EnumerableQueryExecutor(), ref source, new EnumerableSourceCardinalityManagement<TSource>(source), description, queryString);
+            ExtendedTest(queryFunc, new DeferredEnumerableQueryExecutor(), ref source, new EnumerableSourceCardinalityManagement<TSource>(source), description, queryString);
         }
 
         public static void ExtendedTest(Func<IEnumerable> queryFunc, ref int count, String description = null, String queryString = null)
         {
-            ExtendedTest(queryFunc, new EnumerableQueryExecutor(), ref count, new IntCardinalityManagementStrategy(count), description, queryString);
+            ExtendedTest(queryFunc, new DeferredEnumerableQueryExecutor(), ref count, new IntCardinalityManagementStrategy(count), description, queryString);
         }
 
         public static void ExtendedTest<TSource>(Func<Func<IEnumerable>> enumFuncFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)

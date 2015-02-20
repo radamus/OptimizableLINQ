@@ -44,10 +44,10 @@ namespace OptimisableLINQBenchmark
                 
         }
 
-        public static ICollection<SizeVsTimeStats> AutoSizeVsTimeTest<TCardConf, TQuery>(Func<TQuery> query, IQueryExecutor<TQuery> executor, ref TCardConf cardConfigurator, IQuerySourceCardinalityManagement<TCardConf> cardManager, int ratio = 2, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
+        public static ICollection<SizeVsTimeStats> AutoSizeVsTimeTest<TCardConf, TQuery>(Func<TQuery> query, IQueryExecutor<TQuery> executor, ref TCardConf cardConfigurator, IQuerySourceCardinalityManagement<TCardConf> cardManager, int minCount = 1, int ratio = 2, int noOfRepeats = 11, int maxTestTimeMsec = Int32.MaxValue, double minTestTimeMsec = 0)
         {
             ICollection<SizeVsTimeStats> stats = new List<SizeVsTimeStats>();
-            int srcCount = 1;
+            int srcCount = minCount;
             while (srcCount <= cardManager.GetFullCardinality())
             {
                 cardManager.Reduce(ref cardConfigurator, srcCount);

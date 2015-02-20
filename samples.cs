@@ -127,7 +127,6 @@ namespace LINQConverters
             watch.Stop();
             Trace.WriteLine("* 2nd run: Queryable compilation time: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
 
-
             watch.Restart();
             var optQuery = lproducts.AsOptimizable().Join(rproducts, p => lproducts.Where(p1 => p1.productName == "Ikura").
                   Select(p1 => p1.unitPrice).Contains(p.unitPrice) ? p.unitPrice : 0, p => lproducts.

@@ -29,6 +29,7 @@ namespace OptimisableLINQBenchmark
 
         static void Main(string[] args)
         {
+
 //            NessosBench.Go();
             
             Console.WriteLine("Is StopWatch resolution high: {0}", System.Diagnostics.Stopwatch.IsHighResolution);
@@ -36,11 +37,15 @@ namespace OptimisableLINQBenchmark
 
             productsBy10 = products.Take(products.Count() / 10).ToList();
             SimplestTestingTest();
-//            TempTest();
 
-            nessosFactoringOutTests(1000);
+
+            if (TestingEnvironment.EXTENDED_DATA)
+                nessosFactoringOutTests(10000);
+            else
+                nessosFactoringOutTests(100);
+
             FactoringOutTests();
-//            FactoringOutTests();
+
 
 /**/
             Console.ReadLine();
