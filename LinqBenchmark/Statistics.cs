@@ -55,7 +55,7 @@ namespace OptimisableLINQBenchmark
 
         private static string SizeVsTimeStats2CSVHeader()
         {
-            return "srcSize" + CSV_SEPARATOR + "resSize" + CSV_SEPARATOR + "med[msec]" + CSV_SEPARATOR + "min[msec]" + CSV_SEPARATOR + "noOfRepeats";
+            return "srcSize" + CSV_SEPARATOR + "resCRC" + CSV_SEPARATOR + "med[msec]" + CSV_SEPARATOR + "min[msec]" + CSV_SEPARATOR + "noOfRepeats";
         }
 
         private static String SizeVsTimeStats2CSV(SizeVsTimeStats stats)
@@ -81,7 +81,7 @@ namespace OptimisableLINQBenchmark
             StringBuilder res = new StringBuilder();
 
             res.Append(String.Format(formatString + Environment.NewLine,
-                 "srcSize", "resSize", "med[msec]", "min[msec]", "noOfRepeats"));
+                 "srcSize", "resCRC", "med[msec]", "min[msec]", "noOfRepeats"));
             
             foreach (SizeVsTimeStats s in stats)
                 res.Append(String.Format(formatString + Environment.NewLine,

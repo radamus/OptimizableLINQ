@@ -9,6 +9,7 @@ namespace OptimisableLINQBenchmark
 {
 
     using SampleData;
+    using OptimisableLINQ;
 
     class Program
     {
@@ -20,33 +21,13 @@ namespace OptimisableLINQBenchmark
         static void SimplestTestingTest()
         {
             TestingEnvironment.SimpleTest(products, products.Count(), "List of all products");
-        }
 
-        static void TempTest()
-        {   
-            var res = QueryTester.TestReducedSource(() => products.SelectMany(p => products.Where(pw => pw.unitPrice >= 90).
-                Where(pup => products.Where(p2 => p2.productName == pup.productName).Average(p2=>p2.unitPrice) > p.unitPrice).
-                Select(pup => p.productName + " bezsensowny " + pup.productName)), ref products, 100);
+            // TODO: support global captured variables in optimizer
+            IEnumerable<Product> productsLoc = products;
 
-            Console.WriteLine("For {0} count: {1}", 100, res.resultSize);
+            TimeStats stats = OptimisationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, productsLoc);
 
-            res = QueryTester.TestReducedSource(() => products.SelectMany(p => products.Where(pw => pw.unitPrice >= 90).
-                Where(pup => products.Where(p2 => p2.productName == p.productName).Average(p2=>p2.unitPrice) > pup.unitPrice).
-                Select(pup => p.productName + " bezsensowny " + pup.productName)), ref products, 1000);
-
-            Console.WriteLine("For {0} count: {1}", 1000, res.resultSize);
-
-            res = QueryTester.TestReducedSource(() => products.SelectMany(p => products.Where(pw => pw.unitPrice >= 90).
-                Where(pup => products.Where(p2 => p2.productName == p.productName).Average(p2=>p2.unitPrice) > pup.unitPrice).
-                Select(pup => p.productName + " bezsensowny " + pup.productName)), ref products, 10000);
-
-            Console.WriteLine("For {0} count: {1}", 10000, res.resultSize);
-
-            res = QueryTester.TestReducedSource(() => products.SelectMany(p => products.Where(pw => pw.unitPrice >= 90).
-                Where(pup => products.Where(p2 => p2.productName == p.productName).Average(p2 => p2.unitPrice) > pup.unitPrice).
-                Select(pup => p.productName + " bezsensowny " + pup.productName)), ref products, products.Count());
-
-            Console.WriteLine("For {0} count: {1}", products.Count(), res.resultSize);
+            Console.WriteLine("Optimisation time: {0} msec" + Environment.NewLine, stats.medianTimeMsec);
         }
 
         static void Main(string[] args)
@@ -57,7 +38,7 @@ namespace OptimisableLINQBenchmark
             TestingEnvironment.InitProducts(ref products);
 
             productsBy10 = products.Take(products.Count() / 10).ToList();
-            SimplestTestingTest();
+//            SimplestTestingTest();
 //            TempTest();
 
             nessosFactoringOutTests(1000);
@@ -70,7 +51,7 @@ namespace OptimisableLINQBenchmark
 
         private static void FactoringOutTests()
         {
- /*           if (EVALUATE_ORIGINALS)
+            if (EVALUATE_ORIGINALS)
             {
                 TestFactoringOut.innerQueryOriginal(productsBy10);
                 TestFactoringOut.innerQueryOriginalOthersTest(productsBy10);
@@ -88,7 +69,7 @@ namespace OptimisableLINQBenchmark
             TestFactoringOut.singleResultTest(products);
             TestFactoringOut.suspendedSingleResultTest(products);
             TestFactoringOut.suspendedSingleResultOthersTest(products);
-*/
+
             if (EVALUATE_ORIGINALS)
             {
                 TestFactoringOut.singleExpressionOriginal(products);

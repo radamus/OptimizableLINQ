@@ -8,6 +8,8 @@ namespace SampleData
 {
     public class SimpleExtendedGenerator
     {
+        private static String PRODUCTS_FILE = "products.txt";
+
         public static void fillProducts(ref ICollection<Product> list, int limit = -1)
         {
             int counter = 0;
@@ -16,9 +18,12 @@ namespace SampleData
 
             NumberFormatInfo provider = new NumberFormatInfo();
             provider.NumberDecimalSeparator = ".";
-
-            //System.IO.StreamReader file = new System.IO.StreamReader("Resources/products.txt");
-            System.IO.StringReader file = new System.IO.StringReader(TestData.Properties.Resources.products);
+            
+            System.IO.TextReader file;
+            if (System.IO.File.Exists(PRODUCTS_FILE))
+                file = new System.IO.StreamReader(PRODUCTS_FILE);
+            else 
+                file = new System.IO.StringReader(TestData.Properties.Resources.products);
             while ((line = file.ReadLine()) != null && limit > counter++)
             {
                 string[] fields = line.Split(',');

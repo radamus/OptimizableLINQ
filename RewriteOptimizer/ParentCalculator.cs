@@ -83,7 +83,9 @@ namespace OptimisableLINQ
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            child2Parent[node.Expression] = node;
+            if (node.Expression != null)
+                child2Parent[node.Expression] = node;
+            
             return base.VisitMember(node);
         }
 

@@ -36,7 +36,7 @@ namespace OptimisableLINQBenchmark
             products = productsCol.ToList();
         }
 
-        public static void SimpleTest(IEnumerable query, int sourceCount, String description = null, String queryString = null)
+        public static void SimpleTest<TQuery>(TQuery query, IQueryExecutor<TQuery> executor, int sourceCount, String description = null, String queryString = null)
         {
             if (description != null)
                 Console.WriteLine("* * * * * " + description);
@@ -46,88 +46,71 @@ namespace OptimisableLINQBenchmark
                 Console.WriteLine("Query: " + queryString);
 
             if (VERBOSE)
-                Console.WriteLine("Query result count for a full source ({0} elements) : {1}", sourceCount, query.Count());
-            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
+                Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.resultCRC(query));
+            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
+
+        }
+
+        public static void SimpleTest(IEnumerable query, int sourceCount, String description = null, String queryString = null)
+        {
+            SimpleTest(query, new EnumerableQueryExecutor(), sourceCount, description, queryString);
+        }
+
+        public static void ExtendedTest<TCardConf, TQuery>(Func<TQuery> query, IQueryExecutor<TQuery> executor, ref TCardConf cardConfigurator, IQuerySourceCardinalityManagement<TCardConf> cardManager, String description = null, String queryString = null)
+        {
+            SimpleTest(query(), executor, cardManager.GetFullCardinality(), description, queryString);
+
+            if (!NOEXTENDED_TESTS)
+            {
+
+                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
+                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+
+                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
+                if (PRINT_CSV)
+                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
+            }
 
         }
 
         public static void ExtendedTest<TSource>(Func<IEnumerable> queryFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
         {
-            SimpleTest(queryFunc(), source.Count(), description, queryString);
-
-            if (!NOEXTENDED_TESTS)
-            {
-
-                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeTest(queryFunc, ref source, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeTest(queryFunc, ref source, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
-
-                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
-                if (PRINT_CSV)
-                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
-            }
+            ExtendedTest(queryFunc, new EnumerableQueryExecutor(), ref source, new EnumerableSourceCardinalityManagement<TSource>(source), description, queryString);
         }
 
-        public static void ExtendedIntTest(Func<IEnumerable> queryFunc, ref int count, String description = null, String queryString = null)
+        public static void ExtendedTest(Func<IEnumerable> queryFunc, ref int count, String description = null, String queryString = null)
         {
-            SimpleTest(queryFunc(), count, description, queryString);
-
-            if (!NOEXTENDED_TESTS)
-            {
-
-                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeIntTest(queryFunc, ref count, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeIntTest(queryFunc, ref count, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
-
-                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
-                if (PRINT_CSV)
-                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
-            }
-        }
-
-        public static void SimpleTest(Func<IEnumerable> enumFunc, int sourceCount, String description = null, String queryString = null)
-        {
-            if (description != null)
-                Console.WriteLine("* * * * * " + description);
-            else
-                Console.WriteLine("* * * * *");
-            if (VERBOSE && queryString != null)
-                Console.WriteLine("Query: " + queryString);
-
-            if (VERBOSE)
-                Console.WriteLine("Query result count for a full source ({0} elements) : {1}", sourceCount, enumFunc().Count());
-            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, EnumFuncFuncTester.Test(enumFunc, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
-
+            ExtendedTest(queryFunc, new EnumerableQueryExecutor(), ref count, new IntCardinalityManagementStrategy(count), description, queryString);
         }
 
         public static void ExtendedTest<TSource>(Func<Func<IEnumerable>> enumFuncFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
         {
-            SimpleTest(enumFuncFunc(), source.Count(), description, queryString);
-
-            if (!NOEXTENDED_TESTS)
-            {
-
-                ICollection<SizeVsTimeStats> statsList = EnumFuncFuncTester.AutoSizeVsTimeTest(enumFuncFunc, ref source, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(EnumFuncFuncTester.AutoSizeVsTimeTest(enumFuncFunc, ref source, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
-
-                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
-                if (PRINT_CSV)
-                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
-            }
+            ExtendedTest(enumFuncFunc, new FuncEnumerableQueryExecutor(), ref source, new EnumerableSourceCardinalityManagement<TSource>(source), description, queryString);
         }
 
-        public static void ExtendedIntTest(Func<Func<IEnumerable>> enumFuncFunc, ref int count, String description = null, String queryString = null)
+        public static void ExtendedTest(Func<Func<IEnumerable>> enumFuncFunc, ref int count, String description = null, String queryString = null)
         {
-            SimpleTest(enumFuncFunc(), count, description, queryString);
+            ExtendedTest(enumFuncFunc, new FuncEnumerableQueryExecutor(), ref count, new IntCardinalityManagementStrategy(count), description, queryString);
+        }
 
-            if (!NOEXTENDED_TESTS)
-            {
+        public static void ExtendedTest<TSource>(Func<Func<int>> intFuncFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
+        {
+            ExtendedTest(intFuncFunc, new FuncIntQueryExecutor(), ref source, new EnumerableSourceCardinalityManagement<TSource>(source), description, queryString);
+        }
 
-                ICollection<SizeVsTimeStats> statsList = EnumFuncFuncTester.AutoSizeVsTimeIntTest(enumFuncFunc, ref count, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(EnumFuncFuncTester.AutoSizeVsTimeIntTest(enumFuncFunc, ref count, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+        public static void ExtendedTest(Func<Func<int>> intFuncFunc, ref int count, String description = null, String queryString = null)
+        {
+            ExtendedTest(intFuncFunc, new FuncIntQueryExecutor(), ref count, new IntCardinalityManagementStrategy(count), description, queryString);
+        }
+        
+        public static void ExtendedTest<TSource>(Func<int> intFunc, ref IEnumerable<TSource> source, String description = null, String queryString = null)
+        {
+            ExtendedTest(() => intFunc, ref source, description, queryString);
+        }
 
-                Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
-                if (PRINT_CSV)
-                    Console.WriteLine(StatisticsExporter.SizeVsTimeStatsCollection2CSV(statsList));
-            }
+        public static void ExtendedTest(Func<int> intFunc, ref int count, String description = null, String queryString = null)
+        {
+            ExtendedTest(() => intFunc, ref count, description, queryString);
         }
     }
 }

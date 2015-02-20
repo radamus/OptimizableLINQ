@@ -354,10 +354,10 @@ namespace OptimisableLINQBenchmark
                             "from a in Enumerable.Range(1, max + 1)\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true"
                             );
             */
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession",
-                "Enumerable.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true)))"
+                "Enumerable.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count()"
                 );
         }
 
@@ -365,119 +365,119 @@ namespace OptimisableLINQBenchmark
         public static void nessosPythagoreanTriplesQueryOthersTest(int max) 
         {
 
-            TestingEnvironment.ExtendedIntTest(() => from a in ParallelEnumerable.Range(1, max + 1)
+            TestingEnvironment.ExtendedTest(() => (from a in ParallelEnumerable.Range(1, max + 1)
                                                      from b in Enumerable.Range(a, max + 1 - a)
                                                      from c in Enumerable.Range(b, max + 1 - b)
                                                      where a * a + b * b == c * c
-                                                     select true,
+                                                   select true).Count(),
                              ref max,
                             "Original Pythagorean Triples Query Expession with PLINQ",
-                            "from a in ParallelEnumerable.Range(1, max + 1)\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true"
-                            );
-            
-            TestingEnvironment.ExtendedIntTest(() => (from a in QueryExpr.Range(1, max + 1)
-                                                     from b in Enumerable.Range(a, max + 1 - a)
-                                                     from c in Enumerable.Range(b, max + 1 - b)
-                                                     where a * a + b * b == c * c
-                                                     select true).Compile(),
-                             ref max,
-                            "Original Pythagorean Triples Query Expession with LinqOptimizer",
-                            "(from a in QueryExpr.Range(1, max + 1)\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true).Compile()"
+                            "(from a in ParallelEnumerable.Range(1, max + 1)\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true).Count()"
                             );
 
-            TestingEnvironment.ExtendedIntTest(() => (from a in Enumerable.Range(1, max + 1).AsParallelQueryExpr()
+            TestingEnvironment.ExtendedTest(() => (from a in QueryExpr.Range(1, max + 1)
                                                      from b in Enumerable.Range(a, max + 1 - a)
                                                      from c in Enumerable.Range(b, max + 1 - b)
                                                      where a * a + b * b == c * c
-                                                     select true).Compile(),
+                                                   select true).Count().Compile(),
+                             ref max,
+                            "Original Pythagorean Triples Query Expession with LinqOptimizer",
+                            "(from a in QueryExpr.Range(1, max + 1)\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true).Count().Compile()"
+                            );
+
+            TestingEnvironment.ExtendedTest(() => (from a in Enumerable.Range(1, max + 1).AsParallelQueryExpr()
+                                                     from b in Enumerable.Range(a, max + 1 - a)
+                                                     from c in Enumerable.Range(b, max + 1 - b)
+                                                     where a * a + b * b == c * c
+                                                   select true).Count().Compile(),
                              ref max,
                             "Original Pythagorean Triples Query Expession with Parallel LinqOptimizer",
-                            "(from a in Enumerable.Range(1, max + 1).AsParallelQueryExpr()\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true).Compile()"
+                            "(from a in Enumerable.Range(1, max + 1).AsParallelQueryExpr()\nfrom b in Enumerable.Range(a, max + 1 - a)\nfrom c in Enumerable.Range(b, max + 1 - b)\nwhere a * a + b * b == c * c\nselect true).Count().Compile()"
                             );
         }
 
         public static void nessosPythagoreanTriplesOriginalOthersTest(int max)
         {
 
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count(),
                              ref max,
                             "Original Pythagorean Triples Expession with PLINQ",
-                            "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true)))"
-            );
-            
-            TestingEnvironment.ExtendedIntTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Compile(),
-                             ref max,
-                            "Original Pythagorean Triples Expession with LinqOptimizer",
-                            "QueryExpr.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Compile()"
+                            "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count()"
             );
 
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Compile(),
+            TestingEnvironment.ExtendedTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count().Compile(),
+                             ref max,
+                            "Original Pythagorean Triples Expession with LinqOptimizer",
+                            "QueryExpr.Range(1, max + 1).SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count().Compile()"
+            );
+
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count().Compile(),
                              ref max,
                             "Original Pythagorean Triples Expession with Parallel LinqOptimizer",
-                            "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Compile()"
+                            "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => Enumerable.Range(a, max + 1 - a).SelectMany(b => Enumerable.Range(b, max + 1 - b).Where(c => a * a + b * b == c * c).Select(r => true))).Count().Compile()"
             );
 
         }
 
         public static void nessosPythagoreanTriplesTest(int max)
         {
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany",
-                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true)))))"
+                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count()"
                 );
 
         }
 
         public static void nessosPythagoreanTriplesOthersTest(int max)
         {
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with PLINQ",
-                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true)))))"
+                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count()"
                 );
 
-            TestingEnvironment.ExtendedIntTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Compile(),
+            TestingEnvironment.ExtendedTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with LinqOptimizer",
-                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Compile()"
+                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile()"
                 );
 
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Compile(),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with Parallel LinqOptimizer",
-                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Compile()"
+                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile()"
                 );
         }
 
         public static void suspendedNessosPythagoreanTriplesTest(int max)
         {
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany",
-                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true)))))"
+                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
                 );
 
         }
 
         public static void suspendedNessosPythagoreanTriplesOthersTest(int max)
         {
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with PLINQ",
-                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true)))))"
+                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
                 );
 
-            TestingEnvironment.ExtendedIntTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Compile(),
+            TestingEnvironment.ExtendedTest(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with LinqOptimizer",
-                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Compile()"
+                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
                 );
 
-            TestingEnvironment.ExtendedIntTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Compile(),
+            TestingEnvironment.ExtendedTest(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with Parallel LinqOptimizer",
-                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Compile()"
+                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
                 );
         }
 

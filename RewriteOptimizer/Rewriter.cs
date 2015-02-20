@@ -16,7 +16,6 @@ namespace OptimisableLINQ
         static readonly MethodInfo asQueryable = typeof(Queryable).GetMethods().Where(m => m.Name == "AsQueryable" && m.IsGenericMethod).First();
         public Expression Optimize(Expression query)
         {
-            
 
             Expression optimized = query;
             int i = 0;

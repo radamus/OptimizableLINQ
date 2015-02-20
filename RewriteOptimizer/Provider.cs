@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -82,8 +83,14 @@ namespace OptimisableLINQ
         {
             return new OptimizableQueryable<TData>(query.AsQueryable<TData>().Expression);
         }
+
+        public static IQueryable AsOptimizable(this IEnumerable query)
+        {
+            return new OptimizableQueryable<object>(query.AsQueryable().Expression);
+        }
     }
 
+    
     internal class OptimizableQueryable<TData> : IQueryable<TData>, IQueryable, IOrderedQueryable<TData>, IOrderedQueryable
     {
         IQueryable<TData> queryable;
