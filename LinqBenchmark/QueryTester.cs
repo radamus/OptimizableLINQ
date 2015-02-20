@@ -20,7 +20,7 @@ namespace OptimisableLINQBenchmark
         {
             timeList.Clear();
 
-            executor.prepare(ref query);
+            executor.Prepare(ref query);
 
             for (int i = 0; i < noOfRepeats; i++)
             {
@@ -28,7 +28,7 @@ namespace OptimisableLINQBenchmark
                 sw.Reset();
                 do {
                     sw.Start();
-                    executor.run(ref query);             
+                    executor.Run(ref query);             
                     sw.Stop();
                     count++;
                 } while (sw.Elapsed.TotalMilliseconds < minTestTimeMsec);
@@ -51,7 +51,7 @@ namespace OptimisableLINQBenchmark
             while (srcCount <= cardManager.GetFullCardinality())
             {
                 cardManager.Reduce(ref cardConfigurator, srcCount);
-                stats.Add(new SizeVsTimeStats(srcCount, executor.resultCRC(query()), Test(query(), executor, noOfRepeats, maxTestTimeMsec, minTestTimeMsec)));
+                stats.Add(new SizeVsTimeStats(srcCount, executor.ResultCRC(query()), Test(query(), executor, noOfRepeats, maxTestTimeMsec, minTestTimeMsec)));
                 srcCount *= ratio; 
             }
             cardManager.Revert(ref cardConfigurator);

@@ -46,7 +46,7 @@ namespace OptimisableLINQBenchmark
                 Console.WriteLine("Query: " + queryString);
 
             if (VERBOSE)
-                Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.resultCRC(query));
+                Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.ResultCRC(query));
             Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
 
         }

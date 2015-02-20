@@ -22,10 +22,7 @@ namespace OptimisableLINQBenchmark
         {
             TestingEnvironment.SimpleTest(products, products.Count(), "List of all products");
 
-            // TODO: support global captured variables in optimizer
-            IEnumerable<Product> productsLoc = products;
-
-            TimeStats stats = OptimisationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, productsLoc);
+            TimeStats stats = OptimisationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizableLINQApplicator());
 
             Console.WriteLine("Optimisation time: {0} msec" + Environment.NewLine, stats.medianTimeMsec);
         }
@@ -38,7 +35,7 @@ namespace OptimisableLINQBenchmark
             TestingEnvironment.InitProducts(ref products);
 
             productsBy10 = products.Take(products.Count() / 10).ToList();
-//            SimplestTestingTest();
+            SimplestTestingTest();
 //            TempTest();
 
             nessosFactoringOutTests(1000);

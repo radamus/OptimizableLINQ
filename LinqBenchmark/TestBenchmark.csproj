@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="DataReducer.cs" />
     <Compile Include="NessosBench.cs" />
+    <Compile Include="OptimisationFramework.cs" />
     <Compile Include="OptimisationTester.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

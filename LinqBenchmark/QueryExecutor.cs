@@ -9,28 +9,28 @@ namespace OptimisableLINQBenchmark
     public interface IQueryExecutor<TQuery>
     {
         // Forces query compilation for queryable and optimizable queries and warmup.
-        void prepare(ref TQuery query);
+        void Prepare(ref TQuery query);
 
-        void run(ref TQuery query);
+        void Run(ref TQuery query);
 
-        int resultCRC(TQuery query);
+        int ResultCRC(TQuery query);
     }
 
     public class EnumerableQueryExecutor : IQueryExecutor<IEnumerable>
     {
-        public void prepare(ref IEnumerable query)
+        public void Prepare(ref IEnumerable query)
         {
             query.GetEnumerator();
         }
 
-        public void run(ref IEnumerable query)
+        public void Run(ref IEnumerable query)
         {
             foreach (object item in query)
             {
             }
         }
 
-        public int resultCRC(IEnumerable query)
+        public int ResultCRC(IEnumerable query)
         {
             return query.Count();
         }
@@ -38,19 +38,19 @@ namespace OptimisableLINQBenchmark
 
     public class FuncEnumerableQueryExecutor : IQueryExecutor<Func<IEnumerable>>
     {
-        public void prepare(ref Func<IEnumerable> query)
+        public void Prepare(ref Func<IEnumerable> query)
         {
             query().GetEnumerator();
         }
 
-        public void run(ref Func<IEnumerable> query)
+        public void Run(ref Func<IEnumerable> query)
         {
             foreach (object item in query.Invoke())
             {
             }
         }
 
-        public int resultCRC(Func<IEnumerable> query)
+        public int ResultCRC(Func<IEnumerable> query)
         {
             return query.Invoke().Count();
         }
@@ -58,17 +58,17 @@ namespace OptimisableLINQBenchmark
 
     public class FuncIntQueryExecutor: IQueryExecutor<Func<int>>
     {
-        public void prepare(ref Func<int> query)
+        public void Prepare(ref Func<int> query)
         {
             query();
         }
 
-        public void run(ref Func<int> query)
+        public void Run(ref Func<int> query)
         {
             query();
         }
 
-        public int resultCRC(Func<int> query)
+        public int ResultCRC(Func<int> query)
         {
             return query();
         }
