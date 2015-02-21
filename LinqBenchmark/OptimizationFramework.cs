@@ -21,49 +21,49 @@ namespace OptimizableLINQBenchmark
 
     public class OptimizableLINQApplicator: OptimizationApplicator
     {
-        Expression OptimizationApplicator.GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public Expression GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return new Rewriter().Optimize((this as OptimizationApplicator).Apply<TSource>(queryFunc, source).Expression);
+            return new Rewriter().Optimize(Apply<TSource>(queryFunc, source).Expression);
         }
 
-        IQueryable<TSource> OptimizationApplicator.Apply<TSource>(IEnumerable<TSource> source)
+        public IQueryable<TSource> Apply<TSource>(IEnumerable<TSource> source)
         {
             return source.AsOptimizable();
         }
 
-        IQueryable OptimizationApplicator.Compile(IQueryable optQuery)
+        public IQueryable Compile(IQueryable optQuery)
         {
             optQuery.GetEnumerator();
             return optQuery;
         }
 
-        IQueryable OptimizationApplicator.Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public IQueryable Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return queryFunc((this as OptimizationApplicator).Apply<TSource>(source));
+            return queryFunc(Apply<TSource>(source));
         }
     }
 
     public class ParallelLINQApplicator : OptimizationApplicator
     {
-        Expression OptimizationApplicator.GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public Expression GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return (this as OptimizationApplicator).Apply<TSource>(queryFunc, source).Expression;
+            return Apply<TSource>(queryFunc, source).Expression;
         }
 
-        IQueryable<TSource> OptimizationApplicator.Apply<TSource>(IEnumerable<TSource> source)
+        public IQueryable<TSource> Apply<TSource>(IEnumerable<TSource> source)
         {
             return (IQueryable<TSource>)source.AsParallel().AsQueryable();
         }
 
-        IQueryable OptimizationApplicator.Compile(IQueryable optQuery)
+        public IQueryable Compile(IQueryable optQuery)
         {
             optQuery.GetEnumerator();
             return optQuery;
         }
 
-        IQueryable OptimizationApplicator.Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public IQueryable Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return queryFunc((this as OptimizationApplicator).Apply<TSource>(source));
+            return queryFunc(Apply<TSource>(source));
         }
     }
 
@@ -76,12 +76,12 @@ namespace OptimizableLINQBenchmark
                 optApp.Add(app);
         }
 
-        Expression OptimizationApplicator.GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public Expression GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return (this as OptimizationApplicator).Apply<TSource>(queryFunc, source).Expression;
+            return Apply<TSource>(queryFunc, source).Expression;
         }
 
-        IQueryable<TSource> OptimizationApplicator.Apply<TSource>(IEnumerable<TSource> source)
+        public IQueryable<TSource> Apply<TSource>(IEnumerable<TSource> source)
         {
             foreach (OptimizationApplicator app in optApp)
                 source = app.Apply(source);
@@ -89,15 +89,15 @@ namespace OptimizableLINQBenchmark
             return (IQueryable<TSource>) source;
         }
 
-        IQueryable OptimizationApplicator.Compile(IQueryable optQuery)
+        public IQueryable Compile(IQueryable optQuery)
         {
             optQuery.GetEnumerator();
             return optQuery;
         }
 
-        IQueryable OptimizationApplicator.Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
+        public IQueryable Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
-            return queryFunc((this as OptimizationApplicator).Apply<TSource>(source));
+            return queryFunc(Apply<TSource>(source));
         }
     }
 

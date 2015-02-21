@@ -17,11 +17,6 @@ namespace OptimizableLINQBenchmark
         public const bool PRINT_CSV = false;
         public const bool VERBOSE = true;
 
-        public const int NOOFREPEATS = 71;
-        public const int MAX_TEST_TIME_MSEC = 10000;
-        public const double MIN_TEST_TIME_MSEC = 0.025;
-
-
         public static void InitProducts(ref IEnumerable<Product> products)
         {
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
@@ -49,7 +44,7 @@ namespace OptimizableLINQBenchmark
 
             if (VERBOSE)
                 Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.ResultCRC(query));
-            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC).medianTimeMsec);
+            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, QueryTester.NOOFREPEATS, QueryTester.MAX_TEST_TIME_MSEC, QueryTester.MIN_TEST_TIME_MSEC).medianTimeMsec);
 
         }
 
@@ -64,9 +59,7 @@ namespace OptimizableLINQBenchmark
 
             if (!NOEXTENDED_TESTS)
             {
-                //TODO: Add safe support for minCount = 0
-                ICollection<SizeVsTimeStats> statsList = QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 1, 2, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC);
-                statsList = statsList.Concat(QueryTester.AutoSizeVsTimeTest(query, executor, ref cardConfigurator, cardManager, 10, 10, NOOFREPEATS, MAX_TEST_TIME_MSEC, MIN_TEST_TIME_MSEC)).ToList();
+                ICollection<SizeVsTimeStats> statsList = QueryTester.DefaultSizeVsTimeStats(query, executor, ref cardConfigurator, cardManager);
 
                 Console.WriteLine(StatisticsExporter.FormattedSizeVsTimeStatsCollection(statsList));
                 if (PRINT_CSV)

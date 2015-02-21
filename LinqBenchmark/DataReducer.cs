@@ -13,6 +13,12 @@ namespace OptimizableLINQBenchmark
         void Revert(ref TConf cardConf);
     }
 
+    public static class QueryCardinalityManagementFactory
+    {
+        public static EnumerableSourceCardinalityManagement<TSource> getManagerFor<TSource>(IEnumerable<TSource> source) { return new EnumerableSourceCardinalityManagement<TSource>(source); }
+        public static IntCardinalityManagementStrategy getManagerFor(int count) { return new IntCardinalityManagementStrategy(count); }
+    }
+
     public class EnumerableSourceCardinalityManagement<TSource> : IQuerySourceCardinalityManagement<IEnumerable<TSource>>
     {
         
@@ -22,15 +28,17 @@ namespace OptimizableLINQBenchmark
             fullSource = source;
         }
 
-        int IQuerySourceCardinalityManagement<IEnumerable<TSource>>.GetFullCardinality() {
+        public int GetFullCardinality()
+        {
             return fullSource.Count();
         }
 
-        void IQuerySourceCardinalityManagement<IEnumerable<TSource>>.Reduce(ref IEnumerable<TSource> source, int reducedCollectionCount) {
+        public void Reduce(ref IEnumerable<TSource> source, int reducedCollectionCount)
+        {
             source = fullSource.Take(reducedCollectionCount).ToList();
         }
 
-        void IQuerySourceCardinalityManagement<IEnumerable<TSource>>.Revert(ref IEnumerable<TSource> source) {
+        public void Revert(ref IEnumerable<TSource> source) {
             source = fullSource;
         }
     }
@@ -44,15 +52,15 @@ namespace OptimizableLINQBenchmark
             fullCount = count;
         }
 
-        int IQuerySourceCardinalityManagement<int>.GetFullCardinality() {
+        public int GetFullCardinality() {
             return fullCount;
         }
 
-        void IQuerySourceCardinalityManagement<int>.Reduce(ref int count, int reducedCollectionCount) {
+        public void Reduce(ref int count, int reducedCollectionCount) {
             count = reducedCollectionCount;
         }
 
-        void IQuerySourceCardinalityManagement<int>.Revert(ref int count) {
+        public void Revert(ref int count) {
             count = fullCount;
         }
 

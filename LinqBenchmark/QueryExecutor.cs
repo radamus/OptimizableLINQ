@@ -34,6 +34,7 @@ namespace OptimizableLINQBenchmark
         {
             return query.Count();
         }
+
     }
 
     public class FuncEnumerableQueryExecutor : IQueryExecutor<Func<IEnumerable>>
@@ -54,6 +55,7 @@ namespace OptimizableLINQBenchmark
         {
             return query.Invoke().Count();
         }
+
     }
 
     public class FuncIntQueryExecutor: IQueryExecutor<Func<int>>
@@ -72,5 +74,7 @@ namespace OptimizableLINQBenchmark
         {
             return query();
         }
+
     }
+
 }
