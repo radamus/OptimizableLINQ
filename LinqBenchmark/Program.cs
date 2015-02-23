@@ -15,8 +15,8 @@ namespace OptimizableLINQBenchmark
     {
         public const bool EVALUATE_ORIGINALS = true;
 
-        public static IEnumerable<Product> products;
-        public static IEnumerable<Product> productsBy10;
+        public static ICollection<Product> products;
+        public static ICollection<Product> productsBy10;
 
         static void SimplestTestingTest()
         {
@@ -30,6 +30,15 @@ namespace OptimizableLINQBenchmark
 
             stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()));
             Console.WriteLine("Optimization time: {0} msec" + Environment.NewLine, stats.medianTimeMsec);
+
+            TestingEnvironment.BenchmarkOptimisations((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, ref products,
+                new OptimizationApplicator[] { new OptimizableLINQApplicator(), new ParallelLINQApplicator(), new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()) }, "Max problem");
+
+            TestingEnvironment.BenchmarkOptimisations((productsSrc) => from Product p in productsSrc
+                                                                       where (from Product p2 in products where p2.productName == "Ikura" select p2.unitPrice).Contains(p.unitPrice)
+                                                                       select p.productName, ref products,
+                new OptimizationApplicator[] { new OptimizableLINQApplicator(), new ParallelLINQApplicator(), new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()) }, "SamePrice problem");
+
         }
 
         static void Main(string[] args)
@@ -40,16 +49,18 @@ namespace OptimizableLINQBenchmark
             Console.WriteLine("Is StopWatch resolution high: {0}", System.Diagnostics.Stopwatch.IsHighResolution);
             TestingEnvironment.InitProducts(ref products);
 
+//            products = products.Take(100).ToList();
+
             productsBy10 = products.Take(products.Count() / 10).ToList();
             SimplestTestingTest();
 
-
+/*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);
             else
                 nessosFactoringOutTests(100);
-
-            FactoringOutTests();
+*/
+//            FactoringOutTests();
 
 
 /**/

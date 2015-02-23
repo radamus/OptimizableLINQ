@@ -43,6 +43,43 @@ namespace OptimizableLINQBenchmark
         }
     }
 
+    public class CollectionSourceCardinalityManagement<TSource> : IQuerySourceCardinalityManagement<ICollection<TSource>>
+    {
+
+        ICollection<TSource> fullSource;
+
+        public CollectionSourceCardinalityManagement(ICollection<TSource> source)
+        {
+            fullSource = new List<TSource>();
+            foreach(TSource e in source) 
+                fullSource.Add(e);
+        }
+
+        public int GetFullCardinality()
+        {
+            return fullSource.Count();
+        }
+
+        public void Reduce(ref ICollection<TSource> source, int reducedCollectionCount)
+        {
+            source.Clear();
+            int i = 0;
+            foreach (TSource e in fullSource)
+            {
+                if (i++ == reducedCollectionCount)
+                    break;
+                source.Add(e);
+            }
+        }
+
+        public void Revert(ref ICollection<TSource> source)
+        {
+            source.Clear();
+            foreach (TSource e in fullSource)
+                source.Add(e);
+        }
+    }
+
     public class IntCardinalityManagementStrategy : IQuerySourceCardinalityManagement<int>
     {
         int fullCount;

@@ -41,6 +41,11 @@ namespace OptimizableLINQBenchmark
         {
             return queryFunc(Apply<TSource>(source));
         }
+
+        public override string ToString()
+        {
+            return "OptimizableLINQ";
+        }
     }
 
     public class ParallelLINQApplicator : OptimizationApplicator
@@ -65,15 +70,20 @@ namespace OptimizableLINQBenchmark
         {
             return queryFunc(Apply<TSource>(source));
         }
+
+        public override string ToString()
+        {
+            return "PLINQ";
+        }
     }
 
     public class OptimizationCompositionApplicator : OptimizationApplicator
     {
-        IList<OptimizationApplicator> optApp = new List<OptimizationApplicator>();
+        IList<OptimizationApplicator> optApps = new List<OptimizationApplicator>();
         
         public OptimizationCompositionApplicator(params OptimizationApplicator[] applicators) {
             foreach (OptimizationApplicator app in applicators)
-                optApp.Add(app);
+                optApps.Add(app);
         }
 
         public Expression GetOptimizedExpression<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
@@ -83,7 +93,7 @@ namespace OptimizableLINQBenchmark
 
         public IQueryable<TSource> Apply<TSource>(IEnumerable<TSource> source)
         {
-            foreach (OptimizationApplicator app in optApp)
+            foreach (OptimizationApplicator app in optApps)
                 source = app.Apply(source);
             
             return (IQueryable<TSource>) source;
@@ -98,6 +108,21 @@ namespace OptimizableLINQBenchmark
         public IQueryable Apply<TSource>(Func<IQueryable<TSource>, IQueryable> queryFunc, IEnumerable<TSource> source)
         {
             return queryFunc(Apply<TSource>(source));
+        }
+
+        public override string ToString()
+        {
+            StringBuilder res = new StringBuilder();
+            for (int i = 0; i < optApps.Count(); i++)
+            {
+                res.Append(optApps[i].ToString());
+                if (i < optApps.Count() - 2)
+                    res.Append(", ");
+                else if (i == optApps.Count() - 2)
+                    res.Append(" and ");
+            }
+
+            return res.ToString();
         }
     }
 
