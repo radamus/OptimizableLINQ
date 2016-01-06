@@ -25,7 +25,7 @@ namespace OptimizableLINQBenchmark
             TimeStats stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizableLINQApplicator());
             Console.WriteLine("Optimization time: {0} msec", stats.medianTimeMsec);
 
-            stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new OptimizableLINQApplicator(), new ParallelLINQApplicator()));
+/*            stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new OptimizableLINQApplicator(), new ParallelLINQApplicator()));
             Console.WriteLine("Optimization time: {0} msec", stats.medianTimeMsec);
 
             stats = OptimizationTester.TestOverheadTime((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, products, new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()));
@@ -33,12 +33,7 @@ namespace OptimizableLINQBenchmark
 
             TestingEnvironment.BenchmarkOptimisations((productsSrc) => from Product p in productsSrc where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice select p.productName, ref products,
                 new OptimizationApplicator[] { new OptimizableLINQApplicator(), new ParallelLINQApplicator(), new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()) }, "Max problem");
-
-            TestingEnvironment.BenchmarkOptimisations((productsSrc) => from Product p in productsSrc
-                                                                       where (from Product p2 in products where p2.productName == "Ikura" select p2.unitPrice).Contains(p.unitPrice)
-                                                                       select p.productName, ref products,
-                new OptimizationApplicator[] { new OptimizableLINQApplicator(), new ParallelLINQApplicator(), new OptimizationCompositionApplicator(new ParallelLINQApplicator(), new OptimizableLINQApplicator()) }, "SamePrice problem");
-
+*/              
         }
 
         static void Main(string[] args)
@@ -54,6 +49,7 @@ namespace OptimizableLINQBenchmark
             productsBy10 = products.Take(products.Count() / 10).ToList();
             SimplestTestingTest();
 
+            TestSuite2016.RunAll(products);
 /*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);

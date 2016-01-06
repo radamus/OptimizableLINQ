@@ -56,6 +56,8 @@ namespace OptimizableLINQBenchmark
             {
                 cardManager.Reduce(ref cardConfigurator, srcCount);
                 stats.Add(new SizeVsTimeStats(srcCount, executor.ResultCRC(query()), Test(query(), executor, noOfRepeats, maxTestTimeMsec, minTestTimeMsec)));
+                if (stats.Count() > 1 && stats.Last().timeStats.noOfRepeats * 2 < stats.ElementAt(stats.Count() - 2).timeStats.noOfRepeats)
+                    break;
                 srcCount *= ratio; 
             }
             cardManager.Revert(ref cardConfigurator);

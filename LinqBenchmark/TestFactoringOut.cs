@@ -66,11 +66,7 @@ namespace OptimizableLINQBenchmark
 
         public static void innerQueryOriginalOthersTest(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Contains(p.unitPrice)).Select(p => p.productName),
-                           ref products,
-                           "Original Ikura with PLINQ",
-                           "products.AsParallel().Where(p => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Contains(p.unitPrice)).Select(p=>p.productName)"
-                           );
+            innerQueryOriginalPLINQ(products);
 
             TestingEnvironment.BenchmarkQuery(() => products.AsQueryExpr().Where(p => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Contains(p.unitPrice)).Select(p => p.productName).Compile(),
                            ref products,
@@ -85,14 +81,20 @@ namespace OptimizableLINQBenchmark
                            );
         }
 
+        public static IEnumerable<Product> innerQueryOriginalPLINQ(IEnumerable<Product> products)
+        {
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Contains(p.unitPrice)).Select(p => p.productName),
+                           ref products,
+                           "Original Ikura with PLINQ",
+                           "products.AsParallel().Where(p => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Contains(p.unitPrice)).Select(p=>p.productName)"
+                           );
+            return products;
+        }
+
         public static void suspendedInnerQueryOthersTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.AsParallel().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
-                               ref products,
-                               "Optimized Ikura With AsGroupSuspendedSelectMany operator with PLINQ",
-                               "OptimizerExtensions.AsGroupSuspended(() => products.AsParallel().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
-                               );
+            suspendedInnerQueryPLINQ(products);
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(products.AsQueryExpr().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Compile()).AsQueryExpr().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Compile(),
                    ref products,
@@ -105,6 +107,16 @@ namespace OptimizableLINQBenchmark
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator with Parallel LinqOptimizer",
                                "OptimizerExtensions.AsGroupSuspendedThreadSafe(products.AsParallelQueryExpr().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Compile()).SelectMany(uThunk => products.AsParallelQueryExpr().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName).Run())"
                                );
+        }
+
+        public static IEnumerable<Product> suspendedInnerQueryPLINQ(IEnumerable<Product> products)
+        {
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.AsParallel().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
+                               ref products,
+                               "Optimized Ikura With AsGroupSuspendedSelectMany operator with PLINQ",
+                               "OptimizerExtensions.AsGroupSuspended(() => products.AsParallel().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               );
+            return products;
         }
 
         public static void singleResultOriginalWithLet(IEnumerable<Product> products)
@@ -266,7 +278,7 @@ namespace OptimizableLINQBenchmark
         public static void suspendedSingleExpressionOthersTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.AsParallel().Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
                                ref products,
                                "Optimized single With AsGroupSuspendedSelectFirst operator with PLINQ",
                                "products.AsParallel().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.AsParallel().Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName)"

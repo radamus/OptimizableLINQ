@@ -12,7 +12,7 @@ namespace OptimizableLINQBenchmark
 
     public static class TestingEnvironment
     {
-        public const bool EXTENDED_DATA = false;
+        public const bool EXTENDED_DATA = true;
         public const bool NOEXTENDED_TESTS = false;
         public const bool PRINT_CSV = false;
         public const bool VERBOSE = true;
@@ -35,17 +35,22 @@ namespace OptimizableLINQBenchmark
 
         public static void SimpleTest<TQuery>(TQuery query, IQueryExecutor<TQuery> executor, int sourceCount, String description = null, String queryString = null)
         {
+            TestHeader(description, queryString);
+
+            if (VERBOSE)
+                Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.ResultCRC(query));
+            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, QueryTester.NOOFREPEATS, QueryTester.MAX_TEST_TIME_MSEC, QueryTester.MIN_TEST_TIME_MSEC).medianTimeMsec);
+
+        }
+
+        private static void TestHeader(String description, String queryString)
+        {
             if (description != null)
                 Console.WriteLine("* * * * * " + description);
             else
                 Console.WriteLine("* * * * *");
             if (VERBOSE && queryString != null)
                 Console.WriteLine("Query: " + queryString);
-
-            if (VERBOSE)
-                Console.WriteLine("Query resultCRC for a full source ({0} elements) : {1}", sourceCount, executor.ResultCRC(query));
-            Console.WriteLine("Evaluation time: {0} msec" + Environment.NewLine, QueryTester.Test(query, executor, QueryTester.NOOFREPEATS, QueryTester.MAX_TEST_TIME_MSEC, QueryTester.MIN_TEST_TIME_MSEC).medianTimeMsec);
-
         }
 
         public static void SimpleTest(IEnumerable query, int sourceCount, String description = null, String queryString = null)
@@ -56,7 +61,7 @@ namespace OptimizableLINQBenchmark
 
         public static ICollection<SizeVsTimeStats> ExtendedTest<TCardConf, TQuery>(Func<TQuery> query, IQueryExecutor<TQuery> executor, ref TCardConf cardConfigurator, IQuerySourceCardinalityManagement<TCardConf> cardManager, String description = null, String queryString = null)
         {
-            SimpleTest(query(), executor, cardManager.GetFullCardinality(), description, queryString);
+            TestHeader(description, queryString);
             
             ICollection<SizeVsTimeStats> statsList = QueryTester.DefaultSizeVsTimeStats(query, executor, ref cardConfigurator, cardManager);
 

@@ -97,14 +97,16 @@ namespace OptimizableLINQBenchmark
             res.Append(String.Format(formatString + Environment.NewLine,
                  "CRC-CHECK", "MinSizeTime", "MaxSizeTime", "GainSrcSize", "Optimisation"));
 
+            IEnumerable<int> sizes = optStatsList.SelectMany(stats => stats.Select(s => s.sourceSize)).GroupBy(size => size).Where(g => g.Count() == optStatsList.Count()).Select(g => g.Key).OrderBy(size => size);
+
             for (int i = 0; i < optStatsList.Count(); i++)
             {
                 ICollection<SizeVsTimeStats> optStats = optStatsList[i];
                
                 res.Append(String.Format(formatString + Environment.NewLine,
-                    optStats.All(stat => stat.resultCRC == orgStats.First(ostat => ostat.sourceSize == stat.sourceSize).resultCRC) ? "CRC-OK" : "CRC-ERROR",
-                     optStats.First().timeStats.medianTimeMsec, optStats.OrderBy(stat => stat.sourceSize).Last().timeStats.medianTimeMsec,
-                     optStats.Where(stat => stat.timeStats.medianTimeMsec < orgStats.First(ostat => ostat.sourceSize == stat.sourceSize).timeStats.medianTimeMsec).Select(stat => stat.sourceSize).DefaultIfEmpty(Int32.MaxValue).OrderBy(size => size).First(),
+                     sizes.All(size => optStats.First(stat => stat.sourceSize == size).resultCRC == orgStats.First(stat => stat.sourceSize == size).resultCRC) ? "CRC-OK" : "CRC-ERROR",
+                     optStats.First(stat => stat.sourceSize == sizes.First()).timeStats.medianTimeMsec, optStats.First(stat => stat.sourceSize == sizes.Last()).timeStats.medianTimeMsec,
+                     optStats.Where(stat => orgStats.Select(ostat => ostat.sourceSize).Contains(stat.sourceSize)).Where(stat => stat.timeStats.medianTimeMsec < orgStats.First(ostat => ostat.sourceSize == stat.sourceSize).timeStats.medianTimeMsec).Select(stat => stat.sourceSize).DefaultIfEmpty(Int32.MaxValue).OrderBy(size => size).First(),
                      descriptions[i]));
             }
 
