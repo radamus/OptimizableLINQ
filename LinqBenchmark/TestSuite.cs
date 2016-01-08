@@ -77,12 +77,13 @@ namespace OptimizableLINQBenchmark
             Console.WriteLine("* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *");
 
 
-
+            TestVolatileIndexing.volatileIndexCreation(products);
 //            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(products);
-//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
-//           TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
+            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
 
-            TestVolatileIndexing.nullSomeUnitPrices(products, false, true);
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.nullSomeUnitPrices(products, false, false);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceQueryOriginal(products);

@@ -32,12 +32,106 @@ namespace OptimizableLINQ
 
     public class VolatileIndex<TKey, TElement>
     {
+        // Lookup does not promise to preserve elements order (but currently it does)
+        private ILookup<TKey, TElement> validKeysLookup;
+
+        private Func<TElement, TKey> keySelector;
+
+        private IList<KeyValueExceptionElement> keyValueExceptionElements;
+
+        private IEnumerable<TElement> source;
+
+        public IEnumerable<TElement> lookup(Func<TKey> key, bool keyOperandBeforeArgumentInIndexedPredicate, Func<TElement, bool> precedingPredicates = null)
+        {
+            TKey keyValue;
+
+            try
+            {
+                keyValue = key();
+            } 
+            catch (Exception e)
+            {
+                if (source.Any()) {
+                    if (precedingPredicates == null) {
+                        if (keyOperandBeforeArgumentInIndexedPredicate) 
+                            keySelector(source.First());
+                        throw e;
+                    }
+                        
+                    foreach(TElement unsafeElement in source.Where(element => precedingPredicates(element))) {
+                        if (keyOperandBeforeArgumentInIndexedPredicate) 
+                            keySelector(unsafeElement);
+                        throw e;
+                    }
+                }
+                return EmptyEnumerable<TElement>.Instance;
+            }
+
+            if (keyValueExceptionElements.Any())
+                if (precedingPredicates == null)
+                    throw keyValueExceptionElements.First().e;
+                else 
+                    foreach (KeyValueExceptionElement kveElement in keyValueExceptionElements.Where(kveElement => precedingPredicates(kveElement.element)))
+                        throw kveElement.e;
+
+            if (precedingPredicates == null)
+                return validKeysLookup[keyValue];
+
+            return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
+        }
+
+        private VolatileIndex()
+        {
+        }
+
+        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            if (keySelector == null)
+            {
+                throw new ArgumentNullException("keySelector");
+            }
+
+            VolatileIndex<TKey, TElement> index = new VolatileIndex<TKey, TElement>();
+            index.source = source;
+            index.keySelector = keySelector;
+            index.keyValueExceptionElements = new List<KeyValueExceptionElement>();
+
+            index.validKeysLookup = source.Where(element =>
+                {
+                    try
+                    {
+                        keySelector(element);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        index.keyValueExceptionElements.Add(new KeyValueExceptionElement { element = element, e = e });
+                        return false;
+                    }
+                }).ToLookup(keySelector);
+
+            return index;
+        }
+        
+        public class KeyValueExceptionElement
+        {
+            public TElement element;
+            internal Exception e = null;
+        }
+    }
+
+    public class SlowVolatileIndex<TKey, TElement>
+    {
         private IndexValuesEnumerable valuesEnumerable;
         
         private IEqualityComparer<TKey> comparer;
                 
-        private VolatileIndex<TKey, TElement>.Grouping[] groupings;
-        private VolatileIndex<TKey, TElement>.Grouping lastGrouping;
+        private SlowVolatileIndex<TKey, TElement>.Grouping[] groupings;
+        private SlowVolatileIndex<TKey, TElement>.Grouping lastGrouping;
         private ArgumentExceptionEnumerable keyExceptionGrouping;
         
         public IEnumerable<VolatileIndexElement> this[Func<TKey> key]
@@ -46,7 +140,7 @@ namespace OptimizableLINQ
           {
               try
               {
-                  VolatileIndex<TKey, TElement>.Grouping grouping = this.GetGrouping(key());
+                  SlowVolatileIndex<TKey, TElement>.Grouping grouping = this.GetGrouping(key());
                   if (grouping == null)
                       return EmptyEnumerable<VolatileIndexElement>.Instance;
 
@@ -62,12 +156,12 @@ namespace OptimizableLINQ
           }
         }
 
-        private VolatileIndex()
+        private SlowVolatileIndex()
         {
             this.comparer = (IEqualityComparer<TKey>) EqualityComparer<TKey>.Default;
         }
 
-        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        internal static SlowVolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
         {
             if (source == null)
             {
@@ -78,7 +172,7 @@ namespace OptimizableLINQ
                 throw new ArgumentNullException("keySelector");
             }
 
-            VolatileIndex<TKey, TElement> lookup = new VolatileIndex<TKey, TElement>();
+            SlowVolatileIndex<TKey, TElement> lookup = new SlowVolatileIndex<TKey, TElement>();
             lookup.keyExceptionGrouping = new ArgumentExceptionEnumerable(source);
 
             lookup.valuesEnumerable = new IndexValuesEnumerable(source, keySelector);
@@ -92,13 +186,13 @@ namespace OptimizableLINQ
             int countGroupings = 7;
             while (countGroupings < distinctKeysCount)
                 countGroupings = checked(2 * countGroupings + 1);
-            lookup.groupings = new VolatileIndex<TKey, TElement>.Grouping[countGroupings];
+            lookup.groupings = new SlowVolatileIndex<TKey, TElement>.Grouping[countGroupings];
 
             int k = 0;
             while (k < sourceWithKeysCount)
             {
                 TKey key = lookup.valuesEnumerable.orderedSourceWithKeys[k].key;
-                VolatileIndex<TKey, TElement>.Grouping grouping = lookup.CreateGrouping(key);
+                SlowVolatileIndex<TKey, TElement>.Grouping grouping = lookup.CreateGrouping(key);
                 grouping.start = k;
                 while (++k < sourceWithKeysCount && lookup.comparer.Equals(lookup.valuesEnumerable.orderedSourceWithKeys[k].key, key)) ;
                 grouping.stop = k;
@@ -113,22 +207,22 @@ namespace OptimizableLINQ
             return 0;
         }
 
-        internal VolatileIndex<TKey, TElement>.Grouping GetGrouping(TKey key)
+        internal SlowVolatileIndex<TKey, TElement>.Grouping GetGrouping(TKey key)
         {
             int hashCode = this.InternalGetHashCode(key);
-            for (VolatileIndex<TKey, TElement>.Grouping grouping = this.groupings[hashCode % this.groupings.Length]; grouping != null; grouping = grouping.hashNext)
+            for (SlowVolatileIndex<TKey, TElement>.Grouping grouping = this.groupings[hashCode % this.groupings.Length]; grouping != null; grouping = grouping.hashNext)
             {
                 if (grouping.hashCode == hashCode && this.comparer.Equals(grouping.key, key))
                       return grouping;
             }
-            return (VolatileIndex<TKey, TElement>.Grouping) null;
+            return (SlowVolatileIndex<TKey, TElement>.Grouping) null;
         }
         
-        internal VolatileIndex<TKey, TElement>.Grouping CreateGrouping(TKey key) {
+        internal SlowVolatileIndex<TKey, TElement>.Grouping CreateGrouping(TKey key) {
             int hashCode = this.InternalGetHashCode(key);
-            for (VolatileIndex<TKey, TElement>.Grouping grouping = this.groupings[hashCode % this.groupings.Length]; grouping != null; grouping = grouping.hashNext);
+            for (SlowVolatileIndex<TKey, TElement>.Grouping grouping = this.groupings[hashCode % this.groupings.Length]; grouping != null; grouping = grouping.hashNext);
             int index = hashCode % this.groupings.Length;
-            VolatileIndex<TKey, TElement>.Grouping grouping1 = new VolatileIndex<TKey, TElement>.Grouping();
+            SlowVolatileIndex<TKey, TElement>.Grouping grouping1 = new SlowVolatileIndex<TKey, TElement>.Grouping();
             grouping1.key = key;
             grouping1.hashCode = hashCode;
             grouping1.hashNext = this.groupings[index];
@@ -249,8 +343,8 @@ namespace OptimizableLINQ
             internal TKey key;
             internal int hashCode;
             internal int start, stop;
-            internal VolatileIndex<TKey, TElement>.Grouping hashNext;
-            internal VolatileIndex<TKey, TElement>.Grouping next;
+            internal SlowVolatileIndex<TKey, TElement>.Grouping hashNext;
+            internal SlowVolatileIndex<TKey, TElement>.Grouping next;
 
             public TKey Key
             {
@@ -266,7 +360,6 @@ namespace OptimizableLINQ
             }
         }
     }
-
 
     public class AlmostVolatileIndex<TKey, TElement>
     {

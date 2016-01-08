@@ -95,6 +95,11 @@ namespace OptimizableLINQ
             return VolatileIndex<TKey, TSource>.Create(source, keySelector);
         }
 
+        public static SlowVolatileIndex<TKey, TSource> ToSlowVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return SlowVolatileIndex<TKey, TSource>.Create(source, keySelector);
+        }
+
         public static AlmostVolatileIndex<TKey, TSource> ToAlmostVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             return AlmostVolatileIndex<TKey, TSource>.Create(source, keySelector, s => s, null);
