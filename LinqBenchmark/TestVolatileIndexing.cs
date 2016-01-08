@@ -54,17 +54,37 @@ namespace OptimizableLINQBenchmark
                            );
         }
 
+        public static void volatileIndexCreation(IEnumerable<ProductX> products)
+        {
+
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToLightVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => pVolIdx.Value.ToString()),
+                           ref products,
+                           "Light Volatile Index Creation",
+                           ""
+                           );
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => pVolIdx.Value.ToString()),
+                           ref products,
+                           "Volatile Index Creation",
+                           ""
+                           );
+        }
+        
         public static void uniqueUnitPriceVolatileIndex(IEnumerable<ProductX> products)
         {
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToLightVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.Where(p => pVolIdx.Value[() => p.unitPrice.Value].Count() == 1).Select(p => p.productName)),
+                           ref products,
+                           "Light Volatile Index Unique unitPrice Lambda Expession",
+                           "OptimizerExtensions.AsGroupSuspended(() => products.ToLightVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.Where(p => pVolIdx.Value[() => p.unitPrice.Value].Count() == 1).Select(p => p.productName))"
+                           );
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.Where(p => pVolIdx.Value[() => p.unitPrice.Value].Count() == 1).Select(p => p.productName)),
                            ref products,
                            "Volatile Index Unique unitPrice Lambda Expession",
-                           "OptimizerExtensions.AsGroup(() => products.ToLookup(p => p.unitPrice.Value)).SelectMany(pLookup => products.Where(p => pLookup[p.unitPrice.Value].Count() == 1).Select(p => p.productName))"
+                           "OptimizerExtensions.AsGroupSuspended(() => products.ToVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.Where(p => pVolIdx.Value[() => p.unitPrice.Value].Count() == 1).Select(p => p.productName))"
                            );
         }
 
-        public static void nullSomeUnitPrices(IEnumerable<ProductX> products, bool nullValidCategories)
+        public static void nullSomeUnitPrices(IEnumerable<ProductX> products, bool nullValidKeyValueCategories, bool nullValidIndexArgumentCategories)
         {
             if (products.Count() < 13)
                 return; 
@@ -73,13 +93,8 @@ namespace OptimizableLINQBenchmark
             productsX[10].unitPrice = null;
             productsX[11].unitPrice = null;
 
-            if (nullValidCategories)
-            {
-                //beverages
-                productsX[1].unitPrice = null;
-                //produce
-                productsX[13].unitPrice = null;
-            }
+            if (nullValidKeyValueCategories) productsX[1].unitPrice = null; //beverages
+            if (nullValidIndexArgumentCategories) productsX[13].unitPrice = null; //produce
         }
         
         public static void sameUnitPriceQueryOriginal(IEnumerable<ProductX> products)
@@ -102,9 +117,9 @@ namespace OptimizableLINQBenchmark
 
         public static void sameUnitPriceVolatileIndex(IEnumerable<ProductX> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.SelectMany(p => pVolIdx.Value[() => p.unitPrice.Value].Where(p2VI => p.category.Equals("Produce") && p2VI.Value.category.Equals("Beverages") && p2VI.IsValid).Select(p2VI => p2VI.Value).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.ToLightVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.SelectMany(p => pVolIdx.Value[() => p.unitPrice.Value].Where(p2VI => p.category.Equals("Produce") && p2VI.Value.category.Equals("Beverages") && p2VI.IsValid).Select(p2VI => p2VI.Value).Select(p2 => p.productName + " and " + p2.productName))),
                            ref products,
-                           "Volatile Index Same unitPrice Lambda Expession",
+                           "Light Volatile Index Same unitPrice Lambda Expession",
                            "OptimizerExtensions.AsGroupSuspended(() => products.ToVolatileIndex(p => p.unitPrice.Value)).SelectMany(pVolIdx => products.SelectMany(p => pVolIdx.Value[() => p.unitPrice.Value].Where(p2VI => p.category.Equals(\"Produce\") && p2VI.Value.category.Equals(\"Beverages\") && p2VI.IsValid).Select(p2VI => p2VI.Value).Select(p2 => p.productName + \" and \" + p2.productName)))"
                            );
         }

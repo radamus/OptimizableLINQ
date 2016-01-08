@@ -79,13 +79,14 @@ namespace OptimizableLINQBenchmark
 
 
 //            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(products);
-//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
-//            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
+            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
+           TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
 
-//            TestVolatileIndexing.nullSomeUnitPrices(products, false);
+            TestVolatileIndexing.nullSomeUnitPrices(products, false, false);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+
         }
  
     }
