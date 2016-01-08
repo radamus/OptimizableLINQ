@@ -33,6 +33,21 @@ namespace OptimizableLINQBenchmark
             products = productsCol.ToList();
         }
 
+        public static void InitProductsX(ref ICollection<ProductX> productsX, ICollection<Product> products)
+        {
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+            ICollection<ProductX> productsCol = new List<ProductX>();
+            foreach (Product p in products)
+                productsCol.Add(new ProductX(p.productID, p.productName, p.category, p.unitPrice, p.unitsInStock));
+
+            watch.Stop();
+            if (VERBOSE)
+                Console.WriteLine("Collection of {0} productsX init time (StopWatch): {1} msec ({2})" + Environment.NewLine,
+                    productsCol.Count(), watch.ElapsedMilliseconds, watch.Elapsed);
+            productsX = productsCol.ToList();
+        }
+
         public static void SimpleTest<TQuery>(TQuery query, IQueryExecutor<TQuery> executor, int sourceCount, String description = null, String queryString = null)
         {
             TestHeader(description, queryString);

@@ -34,13 +34,22 @@ namespace OptimizableLINQBenchmark
         public int sourceSize { get; private set; }
         public int resultCRC { get; private set; }
         public TimeStats timeStats { get; private set; }
+        public Exception caughtException { get; private set; }
 
         internal SizeVsTimeStats(int sourceSize, int resultCRC, TimeStats timeStats)
         {
             this.sourceSize = sourceSize;
             this.resultCRC = resultCRC;
             this.timeStats = timeStats;
+            this.caughtException = null;
         }
+        
+        internal SizeVsTimeStats(int sourceSize, Exception e)
+        {
+            this.sourceSize = sourceSize;
+            this.caughtException = e;
+        }
+
     }
 
 
@@ -82,10 +91,16 @@ namespace OptimizableLINQBenchmark
 
             res.Append(String.Format(formatString + Environment.NewLine,
                  "srcSize", "resCRC", "med[msec]", "min[msec]", "noOfRepeats"));
-            
+
             foreach (SizeVsTimeStats s in stats)
-                res.Append(String.Format(formatString + Environment.NewLine,
-                 s.sourceSize, s.resultCRC, s.timeStats.medianTimeMsec, s.timeStats.minTimeMsec, s.timeStats.noOfRepeats));
+            {
+                if (s.caughtException == null)
+                    res.Append(String.Format(formatString + Environment.NewLine,
+                     s.sourceSize, s.resultCRC, s.timeStats.medianTimeMsec, s.timeStats.minTimeMsec, s.timeStats.noOfRepeats));
+                else
+                    res.Append(String.Format("{0, -11}{1, -30}" + Environment.NewLine,
+                     s.sourceSize, s.caughtException.Message));
+            }
 
             return res.ToString();
         }

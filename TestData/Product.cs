@@ -78,4 +78,81 @@ namespace SampleData
         }
     }
 
+    public class ProductX
+    {
+        public ProductX(int productID, String productName, String category,
+                double? unitPrice, int unitsInStock)
+        {
+            this.productID = productID;
+            this.productName = productName;
+            this.category = category;
+            this.unitPrice = unitPrice;
+            this.unitsInStock = unitsInStock;
+        }
+
+        public int productID;
+        public String productName;
+        public String category;
+        public double? unitPrice;
+        public int unitsInStock;
+        public List<ProductX> related = new List<ProductX>();
+
+        public override String ToString()
+        {
+            return "ProductX[productID=" + productID + ", productName=" + productName + ", category=" + category + ", unitPrice=" + unitPrice + ", unitsInStock=" + unitsInStock + "]";
+        }
+
+        public override int GetHashCode()
+        {
+            const int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((category == null) ? 0 : category.GetHashCode());
+            result = prime * result + productID;
+            result = prime * result
+                    + ((productName == null) ? 0 : productName.GetHashCode());
+            long temp = 0;
+            if (unitPrice.HasValue)
+                temp = BitConverter.DoubleToInt64Bits(unitPrice.Value);
+            result = prime * result + (int)(temp ^ (int)((uint)temp >> 32));
+            result = prime * result + unitsInStock;
+            return result;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (GetType() != obj.GetType())
+                return false;
+            ProductX other = (ProductX)obj;
+            if (category == null)
+            {
+                if (other.category != null)
+                    return false;
+            }
+            else if (!category.Equals(other.category))
+                return false;
+            if (productID != other.productID)
+                return false;
+            if (productName == null)
+            {
+                if (other.productName != null)
+                    return false;
+            }
+            else if (!productName.Equals(other.productName))
+                return false;
+            if (unitPrice.HasValue != other.unitPrice.HasValue)
+                return false;
+            if (unitPrice.HasValue)
+                if (BitConverter.DoubleToInt64Bits(unitPrice.Value) != BitConverter.DoubleToInt64Bits(other.unitPrice.Value))
+                    return false;
+            if (unitsInStock != other.unitsInStock)
+                return false;
+            return true;
+        }
+    }
+
 }

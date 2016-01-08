@@ -17,6 +17,8 @@ namespace OptimizableLINQBenchmark
 
         public static ICollection<Product> products;
         public static ICollection<Product> productsBy10;
+        public static ICollection<ProductX> productsX;
+        public static ICollection<ProductX> productsXBy100;
 
         static void SimplestTestingTest()
         {
@@ -43,13 +45,15 @@ namespace OptimizableLINQBenchmark
             
             Console.WriteLine("Is StopWatch resolution high: {0}", System.Diagnostics.Stopwatch.IsHighResolution);
             TestingEnvironment.InitProducts(ref products);
+            TestingEnvironment.InitProductsX(ref productsX, products);
 
 //            products = products.Take(100).ToList();
 
             productsBy10 = products.Take(products.Count() / 10).ToList();
             SimplestTestingTest();
 
-            TestSuite2016.RunAll(products);
+            productsXBy100 = productsX.Take(products.Count() / 100).ToList();
+            TestSuite2016.RunAll(productsX);
 /*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);

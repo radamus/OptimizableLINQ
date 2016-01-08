@@ -43,6 +43,7 @@
     <Compile Include="OptimizerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeExtensions.cs" />
+    <Compile Include="VolatileIndex.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestData\TestData.csproj">

@@ -65,20 +65,27 @@ namespace OptimizableLINQBenchmark
     public static class TestSuite2016
     {
 
-        public static void RunAll(ICollection<Product> products)
+        public static void RunAll(ICollection<ProductX> products)
         {
             Console.WriteLine("* * * TESTS SUITE * * *");
             UniquePriceProblemCompiled(products);
 
         }
 
-        public static void UniquePriceProblemCompiled(IEnumerable<Product> products)
+        public static void UniquePriceProblemCompiled(IEnumerable<ProductX> products)
         {
             Console.WriteLine("* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *");
 
+
+
 //            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(products);
-            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
-            
+//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
+//            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
+
+//            TestVolatileIndexing.nullSomeUnitPrices(products, false);
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.sameUnitPriceAlternatives(products);
+            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
         }
  
     }
