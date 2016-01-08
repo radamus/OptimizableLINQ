@@ -90,14 +90,14 @@ namespace OptimizableLINQ
             yield return source.ToList();
         }
 
-        public static LightVolatileIndex<TKey, TSource> ToLightVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
-        {
-            return LightVolatileIndex<TKey, TSource>.Create(source, keySelector);
-        }
-
         public static VolatileIndex<TKey, TSource> ToVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
-            return VolatileIndex<TKey, TSource>.Create(source, keySelector, s => s, null);
+            return VolatileIndex<TKey, TSource>.Create(source, keySelector);
+        }
+
+        public static AlmostVolatileIndex<TKey, TSource> ToAlmostVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return AlmostVolatileIndex<TKey, TSource>.Create(source, keySelector, s => s, null);
         }
     }
 }
