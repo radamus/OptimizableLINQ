@@ -146,16 +146,12 @@ namespace OptimizableLINQ
             return grouping1;
         }
 
-        internal class KeyValuePair
-        {
-            internal TElement element;
-            internal TKey key;
-        }
-
         public class VolatileIndexElement
         {
             public TElement Value;
             internal Exception e = null;
+            internal TKey key;
+
             public bool IsValid
             {
                 get
@@ -164,18 +160,11 @@ namespace OptimizableLINQ
                     else throw e;
                 }
             }
-
-            internal VolatileIndexElement(TElement Value, Exception e = null) {
-                this.Value = Value;
-                this.e = e;
-            }
         }
 
         internal class IndexValuesEnumerable : IEnumerable<VolatileIndexElement>
         {
-            internal IList<KeyValuePair> orderedSourceWithKeys;
-
-            private VolatileIndexElement vie;
+            internal IList<VolatileIndexElement> orderedSourceWithKeys;
 
             internal IList<VolatileIndexElement> keyValueExceptionElements;
 
@@ -188,26 +177,22 @@ namespace OptimizableLINQ
                 this.orderedSourceWithKeys = source.Select(element => {
                         try
                         {
-                            return new KeyValuePair { key = keySelector(element), element = element };
+                            return new VolatileIndexElement { key = keySelector(element), Value = element };
                         }
                         catch (Exception e)
                         {
-                            keyValueExceptionElements.Add(new VolatileIndexElement(element, e));
+                            keyValueExceptionElements.Add(new VolatileIndexElement { Value = element, e = e });
                             return null;
                         }
                     }
                     ).Where(pair => pair != null).OrderBy(pair => pair.key).ToList();
-
-                if (orderedSourceWithKeys.Any())
-                    vie = new VolatileIndexElement(orderedSourceWithKeys[0].element);
             }
 
             IEnumerator<VolatileIndexElement> IEnumerable<VolatileIndexElement>.GetEnumerator()
             {
                 for (int i = start; i < stop; i++)
                 {
-                    vie.Value = orderedSourceWithKeys[i].element;
-                    yield return vie;
+                    yield return orderedSourceWithKeys[i];
                 }
                 foreach (VolatileIndexElement vieWithException in keyValueExceptionElements)
                     yield return vieWithException;
@@ -217,8 +202,7 @@ namespace OptimizableLINQ
             {
                 for (int i = start; i < stop; i++)
                 {
-                    vie.Value = orderedSourceWithKeys[i].element;
-                    yield return vie;
+                    yield return orderedSourceWithKeys[i];
                 }
                 foreach (VolatileIndexElement vieWithException in keyValueExceptionElements)
                     yield return vieWithException;
@@ -235,7 +219,7 @@ namespace OptimizableLINQ
             {
                 this.source = source;
                 if (source.Any())
-                    vie = new VolatileIndexElement(source.First());
+                    vie = new VolatileIndexElement { Value = source.First() };
             }
 
             internal void setKeyException(Exception e) { vie.e = e; }
