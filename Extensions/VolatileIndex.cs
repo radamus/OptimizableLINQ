@@ -30,6 +30,68 @@ namespace OptimizableLINQ
         }
     }
 
+    // Avoids all exceptions occuring in original query concerning indexed predicate
+    public class MinimalVolatileIndex<TKey, TElement>
+    {
+        // Lookup does not promise to preserve elements order (but currently it does)
+        private ILookup<TKey, TElement> validKeysLookup;
+
+        private Func<TElement, TKey> keySelector;
+
+        public IEnumerable<TElement> lookup(Func<TKey> key, Func<TElement, bool> precedingPredicates = null)
+        {
+            TKey keyValue;
+
+            try
+            {
+                keyValue = key();
+            }
+            catch (Exception e)
+            {
+                return EmptyEnumerable<TElement>.Instance;
+            }
+
+            if (precedingPredicates == null)
+                return validKeysLookup[keyValue];
+
+            return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
+        }
+
+        private MinimalVolatileIndex()
+        {
+        }
+
+        internal static MinimalVolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            if (keySelector == null)
+            {
+                throw new ArgumentNullException("keySelector");
+            }
+
+            MinimalVolatileIndex<TKey, TElement> index = new MinimalVolatileIndex<TKey, TElement>();
+            
+            index.validKeysLookup = source.Where(element =>
+            {
+                try
+                {
+                    keySelector(element);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }).ToLookup(keySelector);
+
+            return index;
+        }
+    }
+
+    // Preserves exceptions occuring in original query concerning indexed predicate
     public class VolatileIndex<TKey, TElement>
     {
         // Lookup does not promise to preserve elements order (but currently it does)
