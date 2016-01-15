@@ -31,12 +31,10 @@ namespace OptimizableLINQ
     }
 
     // Avoids all exceptions occuring in original query concerning indexed predicate
-    public class MinimalVolatileIndex<TKey, TElement>
+    public class RelaxedVolatileIndex<TKey, TElement>
     {
         // Lookup does not promise to preserve elements order (but currently it does)
         private ILookup<TKey, TElement> validKeysLookup;
-
-        private Func<TElement, TKey> keySelector;
 
         public IEnumerable<TElement> lookup(Func<TKey> key, Func<TElement, bool> precedingPredicates = null)
         {
@@ -57,11 +55,11 @@ namespace OptimizableLINQ
             return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
         }
 
-        private MinimalVolatileIndex()
+        private RelaxedVolatileIndex()
         {
         }
 
-        internal static MinimalVolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        internal static RelaxedVolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
         {
             if (source == null)
             {
@@ -72,7 +70,7 @@ namespace OptimizableLINQ
                 throw new ArgumentNullException("keySelector");
             }
 
-            MinimalVolatileIndex<TKey, TElement> index = new MinimalVolatileIndex<TKey, TElement>();
+            RelaxedVolatileIndex<TKey, TElement> index = new RelaxedVolatileIndex<TKey, TElement>();
             
             index.validKeysLookup = source.Where(element =>
             {
@@ -91,8 +89,132 @@ namespace OptimizableLINQ
         }
     }
 
-    // Preserves exceptions occuring in original query concerning indexed predicate
+    // Used correctly preserves all exceptions occuring in original query
     public class VolatileIndex<TKey, TElement>
+    {
+        // Lookup does not promise to preserve elements order (but currently it does)
+        private ILookup<TKey, TElement> validKeysLookup;
+
+        private Func<TElement, TKey> keySelector;
+
+        Exception firstOccuringKeyValueException = null;
+
+        private IEnumerable<TElement> source;
+
+        // for predicates: key.Equals(p.keyfield)
+        public IEnumerable<TElement> lookupKeyEquals(Func<TKey> key) // keyOperandBeforeArgumentInIndexedPredicate == true
+        {
+            TKey keyValue;
+
+            try
+            {
+                keyValue = key();
+                keyValue.Equals(null); // throw exception if keyValue is null
+            }
+            catch (Exception e)
+            {
+                if (source.Any())
+                {
+                    keySelector(source.First());
+                    throw e;
+                }
+                return EmptyEnumerable<TElement>.Instance;
+            }
+
+            if (firstOccuringKeyValueException != null)
+                throw firstOccuringKeyValueException;
+
+            return validKeysLookup[keyValue];
+        }
+
+        // for predicates: p.keyfield.Equals(key)
+        public IEnumerable<TElement> lookupEqualsKey(Func<TKey> key) // keyOperandBeforeArgumentInIndexedPredicate == false
+        {
+            TKey keyValue;
+
+            try
+            {
+                keyValue = key();
+            }
+            catch (Exception e)
+            {
+                if (source.Any())
+                    throw e;
+                return EmptyEnumerable<TElement>.Instance;
+            }
+
+            if (firstOccuringKeyValueException != null)
+                throw firstOccuringKeyValueException;
+
+            return validKeysLookup[keyValue];
+        }
+
+        public IEnumerable<TElement> lookup(Func<TKey> key, bool keyOperandBeforeArgumentInIndexedPredicate)
+        {
+            TKey keyValue;
+
+            try
+            {
+                keyValue = key();
+            }
+            catch (Exception e)
+            {
+                if (source.Any())
+                {
+                    if (keyOperandBeforeArgumentInIndexedPredicate)
+                        keySelector(source.First());
+                    throw e;
+                }
+                return EmptyEnumerable<TElement>.Instance;
+            }
+
+            if (firstOccuringKeyValueException != null)
+                throw firstOccuringKeyValueException;
+                
+            return validKeysLookup[keyValue];
+        }
+
+        private VolatileIndex()
+        {
+        }
+
+        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            if (keySelector == null)
+            {
+                throw new ArgumentNullException("keySelector");
+            }
+
+            VolatileIndex<TKey, TElement> index = new VolatileIndex<TKey, TElement>();
+            index.source = source;
+            index.keySelector = keySelector;
+
+            index.validKeysLookup = source.Where(element =>
+            {
+                try
+                {
+                    keySelector(element);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    if (index.firstOccuringKeyValueException == null)
+                        index.firstOccuringKeyValueException = e;
+                    return false;
+                }
+            }).ToLookup(keySelector);
+
+            return index;
+        }
+    }
+
+
+    // Preserves exceptions occuring in original query concerning indexed predicate
+    public class PartlyRelaxedVolatileIndex<TKey, TElement>
     {
         // Lookup does not promise to preserve elements order (but currently it does)
         private ILookup<TKey, TElement> validKeysLookup;
@@ -142,11 +264,11 @@ namespace OptimizableLINQ
             return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
         }
 
-        private VolatileIndex()
+        private PartlyRelaxedVolatileIndex()
         {
         }
 
-        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        internal static PartlyRelaxedVolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
         {
             if (source == null)
             {
@@ -157,7 +279,7 @@ namespace OptimizableLINQ
                 throw new ArgumentNullException("keySelector");
             }
 
-            VolatileIndex<TKey, TElement> index = new VolatileIndex<TKey, TElement>();
+            PartlyRelaxedVolatileIndex<TKey, TElement> index = new PartlyRelaxedVolatileIndex<TKey, TElement>();
             index.source = source;
             index.keySelector = keySelector;
             index.keyValueExceptionElements = new List<KeyValueExceptionElement>();

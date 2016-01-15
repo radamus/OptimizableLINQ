@@ -35,7 +35,7 @@ namespace OptimizableLINQ
 
     public static class OptimizerExtensions
     {
-        public static int Count(this IEnumerable source)
+        public static int CountElements(this IEnumerable source)
         {
             int res = 0;
             foreach (var item in source)
@@ -90,9 +90,16 @@ namespace OptimizableLINQ
             yield return source.ToList();
         }
 
-        public static MinimalVolatileIndex<TKey, TSource> ToMinimalVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        // For optimization relaxed in preseriving semantics with regard to unintended side-effects (i.e. ignoring some exceptions)
+        public static RelaxedVolatileIndex<TKey, TSource> ToRelaxedVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
-            return MinimalVolatileIndex<TKey, TSource>.Create(source, keySelector);
+            return RelaxedVolatileIndex<TKey, TSource>.Create(source, keySelector);
+        }
+
+        // For optimization partly relaxed in preseriving semantics with regard to unintended side-effects (i.e. ignoring some exceptions). Preserves side-effects concerning index key.
+        public static PartlyRelaxedVolatileIndex<TKey, TSource> ToPartlyRelaxedVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        {
+            return PartlyRelaxedVolatileIndex<TKey, TSource>.Create(source, keySelector);
         }
 
         public static VolatileIndex<TKey, TSource> ToVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
@@ -100,11 +107,13 @@ namespace OptimizableLINQ
             return VolatileIndex<TKey, TSource>.Create(source, keySelector);
         }
 
+        // DEPRECATED
         public static SlowVolatileIndex<TKey, TSource> ToSlowVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             return SlowVolatileIndex<TKey, TSource>.Create(source, keySelector);
         }
 
+        // INVALID
         public static AlmostVolatileIndex<TKey, TSource> ToAlmostVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             return AlmostVolatileIndex<TKey, TSource>.Create(source, keySelector, s => s, null);

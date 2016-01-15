@@ -74,23 +74,33 @@ namespace OptimizableLINQBenchmark
 
         public static void UniquePriceProblemCompiled(IEnumerable<ProductX> products)
         {
-            Console.WriteLine("* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *");
+            Console.WriteLine("\n* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *\n");
 
-
-            TestVolatileIndexing.volatileIndexCreation(products);
+//            TestVolatileIndexing.volatileIndexCreation(products);
 //            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(products);
-            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
+//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
+//            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
 
-            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.nullSomeUnitPrices(products, false, false);
+            Console.WriteLine("\n* * * SAME PRICE AS PROBLEM - COMPILED * * *\n");
+
+//            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+/*            TestVolatileIndexing.nullSomeUnitPrices(products, false, false);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
             TestVolatileIndexing.nullSomeUnitPrices(products, true, false);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
-            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);*/
+
+            Console.WriteLine("\n* * * UNIQUE CATEGORY AS PROBLEM - COMPILED * * *\n");
+
+            TestVolatileIndexing.nullSomeCategories(products);
+            TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
+            TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
+            TestVolatileIndexing.uniqueCategoryAlternatives(products);
+            TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
+
 
         }
  
