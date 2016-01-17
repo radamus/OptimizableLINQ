@@ -36,7 +36,7 @@ namespace OptimizableLINQ
         // Lookup does not promise to preserve elements order (but currently it does)
         private ILookup<TKey, TElement> validKeysLookup;
 
-        public IEnumerable<TElement> lookup(Func<TKey> key, Func<TElement, bool> precedingPredicates = null)
+        public IEnumerable<TElement> lookup(Func<TKey> key)
         {
             TKey keyValue;
 
@@ -49,10 +49,7 @@ namespace OptimizableLINQ
                 return EmptyEnumerable<TElement>.Instance;
             }
 
-            if (precedingPredicates == null)
-                return validKeysLookup[keyValue];
-
-            return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
+            return validKeysLookup[keyValue];
         }
 
         private RelaxedVolatileIndex()

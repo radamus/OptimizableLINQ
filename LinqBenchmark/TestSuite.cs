@@ -65,42 +65,42 @@ namespace OptimizableLINQBenchmark
     public static class TestSuite2016
     {
 
-        public static void RunAll(ICollection<ProductX> products)
+        public static void RunAll(ICollection<Product> products)
         {
             Console.WriteLine("* * * TESTS SUITE * * *");
-            UniquePriceProblemCompiled(products);
+            UniquePriceProblemCompiled(products, null);
 
         }
 
-        public static void UniquePriceProblemCompiled(IEnumerable<ProductX> products)
+        public static void UniquePriceProblemCompiled(IEnumerable<Product> products, IEnumerable<ProductX> productsX)
         {
             Console.WriteLine("\n* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *\n");
 
-//            TestVolatileIndexing.volatileIndexCreation(products);
-//            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(products);
-//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(products);
-//            TestVolatileIndexing.uniqueUnitPriceAlternatives(products);
-
-            Console.WriteLine("\n* * * SAME PRICE AS PROBLEM - COMPILED * * *\n");
-
-//            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-/*            TestVolatileIndexing.nullSomeUnitPrices(products, false, false);
-            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.sameUnitPriceAlternatives(products);
-            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
-            TestVolatileIndexing.nullSomeUnitPrices(products, true, false);
-            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.sameUnitPriceAlternatives(products);
-            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);*/
+//            TestVolatileIndexing.volatileIndexCreation(productsX);
+//            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(productsX);
+//            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(productsX);
+//            TestVolatileIndexing.uniqueUnitPriceAlternatives(productsX);
 
             Console.WriteLine("\n* * * UNIQUE CATEGORY AS PROBLEM - COMPILED * * *\n");
 
-            TestVolatileIndexing.nullSomeCategories(products);
+//            TestVolatileIndexing.nullSomeCategories(products);
             TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
             TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
             TestVolatileIndexing.uniqueCategoryAlternatives(products);
             TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
 
+            Console.WriteLine("\n* * * SAME PRICE AS PROBLEM - COMPILED * * *\n");
+
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+            
+            TestVolatileIndexing.nullSomeCategories(products);
+            
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+
+/**/
+            
 
         }
  

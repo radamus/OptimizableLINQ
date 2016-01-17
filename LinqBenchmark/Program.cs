@@ -50,10 +50,11 @@ namespace OptimizableLINQBenchmark
 //            products = products.Take(100).ToList();
 
             productsBy10 = products.Take(products.Count() / 10).ToList();
+            productsXBy100 = productsX.Take(products.Count() / 100).ToList();
+
             SimplestTestingTest();
 
-            productsXBy100 = productsX.Take(products.Count() / 100).ToList();
-            TestSuite2016.RunAll(productsX);
+            TestSuite2016.RunAll(products);
 /*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);
