@@ -83,6 +83,9 @@ namespace OptimizableLINQBenchmark
 
             Console.WriteLine("\n* * * UNIQUE CATEGORY AS PROBLEM - COMPILED * * *\n");
 
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.sameUnitPricePLINQ(products);
+
 //            TestVolatileIndexing.nullSomeCategories(products);
             TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
             TestVolatileIndexing.uniqueCategoryAlternatives(products);

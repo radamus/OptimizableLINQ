@@ -256,7 +256,12 @@ namespace OptimizableLINQBenchmark
                            "Partly Relaxed Volatile Index Same unitPrice Lambda Expession",
                            "OptimizerExtensions.AsGroup(() => products.ToPartlyRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice, true, p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
-           
+
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.category)).SelectMany(pCatVolIdx => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => pCatVolIdx.Value.lookup(() => c).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName))))),
+                            ref products,
+                            "Double Relaxed Volatile Index Same unitPrice Lambda Expession",
+                            "() => products.ToRelaxedVolatileIndex(p => p.category)).SelectMany(pCatVolIdx => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => pCatVolIdx.Value.lookup(() => c).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName)))))"
+                            );
         }
 
         public static void sameUnitPricePLINQ(IEnumerable<Product> products)
@@ -275,9 +280,15 @@ namespace OptimizableLINQBenchmark
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
-                           "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession with PLINQv2",
-                           "OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
+                           "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession with PLINQ",
+                           "OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
+
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.category)).SelectMany(pCatVolIdx => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => pCatVolIdx.Value.lookup(() => c).AsParallel().SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName))))),
+                            ref products,
+                            "Double Relaxed Volatile Index Same unitPrice Lambda Expession with PLINQ",
+                            "OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.category)).SelectMany(pCatVolIdx => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.category)).SelectMany(pCatVolIdx => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => pCatVolIdx.Value.lookup(() => c).AsParallel().SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName)))))"
+                            );
         }
 
     }
