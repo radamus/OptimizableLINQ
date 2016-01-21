@@ -58,7 +58,7 @@ namespace OptimizableLINQ
         }
 
         //The best...
-        public static IEnumerable<TSource> AsGroup<TSource>(this Func<TSource> sourceFunc)
+        public static IEnumerable<TSource> AsGroupEager<TSource>(this Func<TSource> sourceFunc)
         {
             yield return sourceFunc();
         }
@@ -74,12 +74,12 @@ namespace OptimizableLINQ
             yield return new Lazy<TSource>(sourceFunc, false);
         }
 */
-        public static IEnumerable<MyLazy<TSource>> AsGroupSuspended<TSource>(this Func<TSource> sourceFunc)
+        public static IEnumerable<MyLazy<TSource>> AsGroup<TSource>(this Func<TSource> sourceFunc)
         {
             yield return new MyLazy<TSource>(sourceFunc);
         }
 
-        public static IEnumerable<MyLazy<IEnumerable<TSource>>> AsGroupSuspended<TSource>(this IEnumerable<TSource> source)
+        public static IEnumerable<MyLazy<IEnumerable<TSource>>> AsGroup<TSource>(this IEnumerable<TSource> source)
         {
             Func<IEnumerable<TSource>> sourceFunc = () => source.ToList();
             yield return new MyLazy<IEnumerable<TSource>>(sourceFunc);

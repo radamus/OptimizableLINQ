@@ -84,23 +84,21 @@ namespace OptimizableLINQBenchmark
             Console.WriteLine("\n* * * UNIQUE CATEGORY AS PROBLEM - COMPILED * * *\n");
 
 //            TestVolatileIndexing.nullSomeCategories(products);
-            TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
             TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
             TestVolatileIndexing.uniqueCategoryAlternatives(products);
             TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
+            TestVolatileIndexing.uniqueCategoryPLINQ(products);
+            
 
             Console.WriteLine("\n* * * SAME PRICE AS PROBLEM - COMPILED * * *\n");
 
-            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+//            TestVolatileIndexing.nullSomeCategories(products);
             TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
-            
-            TestVolatileIndexing.nullSomeCategories(products);
-            
+            TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+            TestVolatileIndexing.sameUnitPricePLINQ(products);
 
 /**/
-            
 
         }
  

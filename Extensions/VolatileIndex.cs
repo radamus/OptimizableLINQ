@@ -36,20 +36,20 @@ namespace OptimizableLINQ
         // Lookup does not promise to preserve elements order (but currently it does)
         private ILookup<TKey, TElement> validKeysLookup;
 
-        public IEnumerable<TElement> lookup(Func<TKey> key)
+        public IEnumerable<TElement> lookup(Func<TKey> criterion)
         {
-            TKey keyValue;
+            TKey criterionValue;
 
             try
             {
-                keyValue = key();
+                criterionValue = criterion();
             }
             catch (Exception e)
             {
                 return EmptyEnumerable<TElement>.Instance;
             }
 
-            return validKeysLookup[keyValue];
+            return validKeysLookup[criterionValue];
         }
 
         private RelaxedVolatileIndex()
@@ -98,67 +98,68 @@ namespace OptimizableLINQ
 
         private IEnumerable<TElement> source;
 
-        // for predicates: key.Equals(p.keyfield)
-        public IEnumerable<TElement> lookupKeyEquals(Func<TKey> key) // keyOperandBeforeArgumentInIndexedPredicate == true
+        // for predicates: criterion.Equals(p.key)
+        public IEnumerable<TElement> lookupKeyEquals(Func<TKey> criterion) // keyOperandBeforeCriterion == false
         {
-            TKey keyValue;
+            if (!source.Any())
+                return EmptyEnumerable<TElement>.Instance;
+            
+            TKey criterionValue;
 
             try
             {
-                keyValue = key();
-                keyValue.Equals(null); // throw exception if keyValue is null
+                criterionValue = criterion();   // firstly exception may occur while evaluation of criterion
+                keySelector(source.First());    // secondly exception may occur while evaluation of key operand
+                criterionValue.Equals(null);    // thirdly exception is thrown if criterion is null (binding an operator)
             }
             catch (Exception e)
             {
-                if (source.Any())
-                {
-                    keySelector(source.First());
-                    throw e;
-                }
-                return EmptyEnumerable<TElement>.Instance;
+                throw e;                
             }
 
             if (firstOccuringKeyValueException != null)
                 throw firstOccuringKeyValueException;
 
-            return validKeysLookup[keyValue];
+            return validKeysLookup[criterionValue];
         }
 
-        // for predicates: p.keyfield.Equals(key)
-        public IEnumerable<TElement> lookupEqualsKey(Func<TKey> key) // keyOperandBeforeArgumentInIndexedPredicate == false
+        // for predicates: p.key.Equals(criterion)
+        public IEnumerable<TElement> lookupEqualsKey(Func<TKey> criterion) // keyOperandBeforeCriterion == true
         {
-            TKey keyValue;
+            if (!source.Any())
+                return EmptyEnumerable<TElement>.Instance;
+            
+            TKey criterionValue;
 
             try
             {
-                keyValue = key();
+                criterionValue = criterion(); // secondly exception may occur while evaluation of criterion
             }
             catch (Exception e)
             {
-                if (source.Any())
-                    throw e;
-                return EmptyEnumerable<TElement>.Instance;
+                keySelector(source.First()); // firstly exception may occur while evaluation of key operand
+                throw e;
             }
 
             if (firstOccuringKeyValueException != null)
                 throw firstOccuringKeyValueException;
 
-            return validKeysLookup[keyValue];
+            return validKeysLookup[criterionValue];
         }
 
-        public IEnumerable<TElement> lookup(Func<TKey> key, bool keyOperandBeforeArgumentInIndexedPredicate)
+        public IEnumerable<TElement> lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion)
         {
-            TKey keyValue;
+            TKey criterionValue;
 
             try
             {
-                keyValue = key();
+                criterionValue = criterion();
             }
             catch (Exception e)
             {
                 if (source.Any())
                 {
-                    if (keyOperandBeforeArgumentInIndexedPredicate)
+                    if (keyOperandBeforeCriterion)
                         keySelector(source.First());
                     throw e;
                 }
@@ -168,7 +169,7 @@ namespace OptimizableLINQ
             if (firstOccuringKeyValueException != null)
                 throw firstOccuringKeyValueException;
                 
-            return validKeysLookup[keyValue];
+            return validKeysLookup[criterionValue];
         }
 
         private VolatileIndex()
@@ -194,7 +195,7 @@ namespace OptimizableLINQ
             {
                 try
                 {
-                    keySelector(element);
+                    keySelector(element).Equals(null); // firstly exception may occur while evaluation of key operand, secondly (assuming criterion is ok) if it is null 
                     return true;
                 }
                 catch (Exception e)
@@ -222,25 +223,25 @@ namespace OptimizableLINQ
 
         private IEnumerable<TElement> source;
 
-        public IEnumerable<TElement> lookup(Func<TKey> key, bool keyOperandBeforeArgumentInIndexedPredicate, Func<TElement, bool> precedingPredicates = null)
+        public IEnumerable<TElement> lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion, Func<TElement, bool> precedingPredicates = null)
         {
-            TKey keyValue;
+            TKey criterionValue;
 
             try
             {
-                keyValue = key();
+                criterionValue = criterion();
             } 
             catch (Exception e)
             {
                 if (source.Any()) {
                     if (precedingPredicates == null) {
-                        if (keyOperandBeforeArgumentInIndexedPredicate) 
+                        if (keyOperandBeforeCriterion) 
                             keySelector(source.First());
                         throw e;
                     }
                         
                     foreach(TElement unsafeElement in source.Where(element => precedingPredicates(element))) {
-                        if (keyOperandBeforeArgumentInIndexedPredicate) 
+                        if (keyOperandBeforeCriterion) 
                             keySelector(unsafeElement);
                         throw e;
                     }
@@ -256,9 +257,9 @@ namespace OptimizableLINQ
                         throw kveElement.e;
 
             if (precedingPredicates == null)
-                return validKeysLookup[keyValue];
+                return validKeysLookup[criterionValue];
 
-            return validKeysLookup[keyValue].Where(element => precedingPredicates(element));
+            return validKeysLookup[criterionValue].Where(element => precedingPredicates(element));
         }
 
         private PartlyRelaxedVolatileIndex()

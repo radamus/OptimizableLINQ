@@ -37,7 +37,7 @@ namespace OptimizableLINQBenchmark
 
         public static void innerQueryTest(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupEager(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSelectMany operator",
                                "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uEnumerable => products.Where(p => uEnumerable.Contains(p.unitPrice)).Select(p => p.productName))"
@@ -49,16 +49,16 @@ namespace OptimizableLINQBenchmark
         public static void suspendedInnerQueryTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Func",
-                               "OptimizerExtensions.AsGroupSuspended(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
             
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Enumerable",
-                               "OptimizerExtensions.AsGroupSuspended(products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               "OptimizerExtensions.AsGroup(products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
 
 
@@ -96,10 +96,10 @@ namespace OptimizableLINQBenchmark
 
             suspendedInnerQueryPLINQ(products);
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(products.AsQueryExpr().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Compile()).AsQueryExpr().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Compile(),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(products.AsQueryExpr().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Compile()).AsQueryExpr().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Compile(),
                    ref products,
                    "Optimized Ikura With AsGroupSuspendedSelectMany operator with LinqOptimizer",
-                   "OptimizerExtensions.AsGroupSuspended(products.AsQueryExpr().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Compile())).AsQueryExpr().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Compile()"
+                   "OptimizerExtensions.AsGroup(products.AsQueryExpr().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).Compile())).AsQueryExpr().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Compile()"
                    );
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(products.AsParallelQueryExpr().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).Compile()).SelectMany(uThunk => products.AsParallelQueryExpr().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName).Run()),
@@ -114,7 +114,7 @@ namespace OptimizableLINQBenchmark
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.AsParallel().Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator with PLINQ",
-                               "OptimizerExtensions.AsGroupSuspended(() => products.AsParallel().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               "OptimizerExtensions.AsGroup(() => products.AsParallel().Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.AsParallel().Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
             return products;
         }
@@ -145,16 +145,16 @@ namespace OptimizableLINQBenchmark
 
         public static void singleResultTest(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupEager(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)),
                                ref products,
                                "Optimized Max With AsGroupSelectMany operator",
-                               "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName))"
+                               "OptimizerExtensions.AsGroupEager(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName))"
                                );
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)).First(),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupEager(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)).First(),
                    ref products,
                    "Optimized Max With AsGroupSelectFirst operator",
-                   "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)).First()"
+                   "OptimizerExtensions.AsGroupEager(() => products.Select(p2 => p2.unitPrice).Max()).Select(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)).First()"
                    );
 
 
@@ -168,10 +168,10 @@ namespace OptimizableLINQBenchmark
 
         public static void suspendedSingleResultTest(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)),
                                ref products,
                                "Optimized Max With AsGroupSuspendedSelectMany operator",
-                               "OptimizerExtensions.AsGroupSuspended(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName))"
+                               "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName))"
                                );
 
         }
@@ -207,10 +207,10 @@ namespace OptimizableLINQBenchmark
                                "OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.AsParallel().Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.AsParallel().Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName))"
                                );
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspended(() => products.AsQueryExpr().Select(p2 => p2.unitPrice).Run().Max()).AsQueryExpr().SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).Compile(),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.AsQueryExpr().Select(p2 => p2.unitPrice).Run().Max()).AsQueryExpr().SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).Compile(),
                                ref products,
                                "Optimized Max With AsGroupSuspendedSelectMany operator with LinqOptimizer",
-                               "OptimizerExtensions.AsGroupSuspended(() => products.AsQueryExpr().Select(p2 => p2.unitPrice).Run().Max()).AsQueryExpr().SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).Compile()"
+                               "OptimizerExtensions.AsGroup(() => products.AsQueryExpr().Select(p2 => p2.unitPrice).Run().Max()).AsQueryExpr().SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)).Compile()"
                                );
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.AsParallelQueryExpr().Select(p2 => p2.unitPrice).Run().Max()).SelectMany(uMaxThunk => products.AsParallelQueryExpr().Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName).Run()),
@@ -234,10 +234,10 @@ namespace OptimizableLINQBenchmark
         public static void singleExpressionTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup)).First()).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupEager(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup)).First()).Select(p => p.productName),
                                ref products,
                                "Optimized single With AsGroupSelectFirst operator",
-                               "products.Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup)).First()).Select(p => p.productName)"
+                               "products.Where(p => OptimizerExtensions.AsGroupEager(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup)).First()).Select(p => p.productName)"
                                );
 
         }
@@ -245,10 +245,10 @@ namespace OptimizableLINQBenchmark
         public static void suspendedSingleExpressionTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
                                ref products,
                                "Optimized single With AsGroupSuspendedSelectFirst operator",
-                               "products.Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName)"
+                               "products.Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName)"
                                );
 
         }
@@ -278,22 +278,22 @@ namespace OptimizableLINQBenchmark
         public static void suspendedSingleExpressionOthersTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName),
                                ref products,
                                "Optimized single With AsGroupSuspendedSelectFirst operator with PLINQ",
-                               "products.AsParallel().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.AsParallel().Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName)"
+                               "products.AsParallel().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.AsParallel().Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName)"
                                );
 
-            TestingEnvironment.BenchmarkQuery(() => products.AsQueryExpr().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile(),
+            TestingEnvironment.BenchmarkQuery(() => products.AsQueryExpr().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile(),
                                ref products,
                                "Optimized single With AsGroupSuspendedSelectFirst operator with LinqOptimizer",
-                               "products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile()"
+                               "products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile()"
                                );
 
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile(),
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile(),
                                ref products,
                                "Optimized single With AsGroupSuspendedSelectFirst operator with Parallel LinqOptimizer",
-                               "products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroupSuspended(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile()"
+                               "products.AsParallelQueryExpr().Where(p => OptimizerExtensions.AsGroup(() => Math.Round(p.unitPrice / 1.2, 2)).Select(pup => products.Any(p2 => p2.unitPrice == pup.Value)).First()).Select(p => p.productName).Compile()"
                                );
 
         }
@@ -319,17 +319,17 @@ namespace OptimizableLINQBenchmark
         public static void simplerExpressionTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10)).Count() == 1).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupEager(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10)).Count() == 1).Select(p => p.productName),
                                ref products,
                                "Optimized simpler With AsGroupSelectMany operator",
-                               "products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10)).Count() == 1).Select(p => p.productName)"
+                               "products.Where(p => OptimizerExtensions.AsGroupEager(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10)).Count() == 1).Select(p => p.productName)"
                                );
 
             // Permissible variant, because First() is deferred (within lambda). 
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10)).First().Count() == 1).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupEager(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10)).First().Count() == 1).Select(p => p.productName),
                    ref products,
                    "Optimized simpler With AsGroupSelectFirst operator",
-                   "products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10)).First().Count() == 1).Select(p => p.productName)"
+                   "products.Where(p => OptimizerExtensions.AsGroupEager(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10)).First().Count() == 1).Select(p => p.productName)"
                    );
 
 
@@ -338,17 +338,17 @@ namespace OptimizableLINQBenchmark
         public static void suspendedSimplerExpressionTest(IEnumerable<Product> products)
         {
 
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).Count() == 1).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).Count() == 1).Select(p => p.productName),
                                ref products,
                                "Optimized simpler With AsGroupSuspendedSelectMany operator",
-                               "products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).Count() == 1).Select(p => p.productName)"
+                               "products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).SelectMany(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).Count() == 1).Select(p => p.productName)"
                                );
 
             // Permissible variant, because First() is deferred (within lambda).
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).First().Count() == 1).Select(p => p.productName),
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).First().Count() == 1).Select(p => p.productName),
                                ref products,
                                "Optimized simpler With AsGroupSuspendedSelectFirst operator",
-                               "products.Where(p => OptimizerExtensions.AsGroupSuspended(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).First().Count() == 1).Select(p => p.productName)"
+                               "products.Where(p => OptimizerExtensions.AsGroup(() => p.unitPrice / 1.2).Select(pup10 => products.Where(p2 => p2.unitPrice == pup10.Value)).First().Count() == 1).Select(p => p.productName)"
                                );
 
         }
@@ -433,29 +433,29 @@ namespace OptimizableLINQBenchmark
 
         public static void nessosPythagoreanTriplesTest(int max)
         {
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupEager(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupEager(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany",
-                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count()"
+                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupEager(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count()"
                 );
 
         }
 
         public static void nessosPythagoreanTriplesOthersTest(int max)
         {
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupEager(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupEager(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with PLINQ",
                 "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count()"
                 );
 
-            TestingEnvironment.BenchmarkQuery(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
+            TestingEnvironment.BenchmarkQuery(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupEager(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupEager(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with LinqOptimizer",
                 "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile()"
                 );
 
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupEager(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupEager(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSelectMany with Parallel LinqOptimizer",
                 "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqr => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqr + b * b).SelectMany(absqr => Enumerable.Range(b, max + 1 - b).Where(c => absqr == c * c).Select(r => true))))).Count().Compile()"
@@ -464,32 +464,32 @@ namespace OptimizableLINQBenchmark
 
         public static void suspendedNessosPythagoreanTriplesTest(int max)
         {
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany",
-                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
+                "Enumerable.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
                 );
 
         }
 
         public static void suspendedNessosPythagoreanTriplesOthersTest(int max)
         {
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with PLINQ",
-                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
+                "Enumerable.Range(1, max + 1).AsParallel().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count()"
                 );
 
-            TestingEnvironment.BenchmarkQuery(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
+            TestingEnvironment.BenchmarkQuery(() => QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with LinqOptimizer",
-                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
+                "QueryExpr.Range(1, max + 1).SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
                 );
 
-            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
+            TestingEnvironment.BenchmarkQuery(() => Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile(),
                  ref max,
                 "Original Pythagorean Triples Expession with AsGroupSuspendedSelectMany with Parallel LinqOptimizer",
-                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroupSuspended(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroupSuspended(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
+                "Enumerable.Range(1, max + 1).AsParallelQueryExpr().SelectMany(a => OptimizerExtensions.AsGroup(() => a * a).SelectMany(asqrThunk => Enumerable.Range(a, max + 1 - a).SelectMany(b => OptimizerExtensions.AsGroup(() => asqrThunk.Value + b * b).SelectMany(absqrThunk => Enumerable.Range(b, max + 1 - b).Where(c => absqrThunk.Value == c * c).Select(r => true))))).Count().Compile()"
                 );
         }
 
