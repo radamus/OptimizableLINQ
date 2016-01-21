@@ -74,17 +74,13 @@ namespace OptimizableLINQBenchmark
 
         public static void UniquePriceProblemCompiled(IEnumerable<Product> products, IEnumerable<ProductX> productsX)
         {
-            Console.WriteLine("\n* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *\n");
-
+//            Console.WriteLine("\n* * * UNIQUE PRICE AS PROBLEM - COMPILED * * *\n");
 //            TestVolatileIndexing.volatileIndexCreation(productsX);
 //            TestVolatileIndexing.uniqueUnitPriceQueryOriginal(productsX);
 //            TestVolatileIndexing.uniqueUnitPriceVolatileIndex(productsX);
 //            TestVolatileIndexing.uniqueUnitPriceAlternatives(productsX);
 
             Console.WriteLine("\n* * * UNIQUE CATEGORY AS PROBLEM - COMPILED * * *\n");
-
-            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
-            TestVolatileIndexing.sameUnitPricePLINQ(products);
 
 //            TestVolatileIndexing.nullSomeCategories(products);
             TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
