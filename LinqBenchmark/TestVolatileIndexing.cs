@@ -217,59 +217,66 @@ namespace OptimizableLINQBenchmark
             productsX[113].category = null;
         }
 
+        static string[] categoriesToAudit = new string[] { "Beverages", "Seafood" };
+
         public static void sameUnitPriceQueryOriginal(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => products.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + " and " + p2.productName)),
+            TestingEnvironment.BenchmarkQuery(() => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => c + " " + p.productName + " and " + p2.productName))),
                            ref products,
                            "Original Same unitPrice Lambda Expession",
-                           "products.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + \" and \" + p2.productName))"
+                           "categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName)))"
                            );
 
+            TestingEnvironment.BenchmarkQuery(() => products.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + " and " + p2.productName)),
+                           ref products,
+                           "Original Same unitPrice Lambda Expession (without categoriesToAudit)",
+                           "products.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + \" and \" + p2.productName))"
+                           );
         }
 
         public static void sameUnitPriceAlternatives(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => products.GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => products.GroupBy(p => p.unitPrice).SelectMany(prodGroup => categoriesToAudit.SelectMany(c => prodGroup.Where(p => c.Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
                            "GroupBy Same unitPrice Lambda Expession",
-                           "products.GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           "products.GroupBy(p => p.unitPrice).SelectMany(prodGroup => categoriesToAudit.SelectMany(c => prodGroup.Where(p => c.Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
         }
 
         public static void sameUnitPriceVolatileIndex(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
                            "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession",
-                           "OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           "OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.ToPartlyRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice, true, p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.ToPartlyRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice, true, p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
                            "Partly Relaxed Volatile Index Same unitPrice Lambda Expession",
-                           "OptimizerExtensions.AsGroup(() => products.ToPartlyRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice, true, p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           "OptimizerExtensions.AsGroup(() => products.ToPartlyRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice, true, p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
            
         }
 
         public static void sameUnitPricePLINQ(IEnumerable<Product> products)
         {
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + " and " + p2.productName)),
-                           ref products,
-                           "Original Same unitPrice Lambda Expession with PLINQ",
-                           "products.AsParallel().Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + \" and \" + p2.productName))"
-                           );
+            TestingEnvironment.BenchmarkQuery(() => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + " and " + p2.productName))),
+                       ref products,
+                       "Original Same unitPrice Lambda Expession with PLINQ",
+                       "categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName)))"
+                       );
 
-            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => categoriesToAudit.SelectMany(c => prodGroup.Where(p => c.Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
                            "Groupby Same unitPrice Lambda Expession with PLINQ",
-                           "products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           "products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => categoriesToAudit.SelectMany(c => prodGroup.Where(p => c.Equals(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
 
-            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.AsParallel().Where(p => "Beverages".Equals(p.category) || "Seafood".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + " " + p.productName + " and " + p2.productName)))),
                            ref products,
-                           "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession with PLINQ",
-                           "OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => products.AsParallel().Where(p => \"Beverages\".Equals(p.category) || \"Seafood\".Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession with PLINQv2",
+                           "OptimizerExtensions.AsGroup(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(pVolIdx => categoriesToAudit.SelectMany(c => products.AsParallel().Where(p => c.Equals(p.category)).SelectMany(p => pVolIdx.Value.lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => c + \" \" + p.productName + \" and \" + p2.productName))))"
                            );
         }
 

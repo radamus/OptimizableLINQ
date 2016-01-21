@@ -97,6 +97,7 @@ namespace OptimizableLINQBenchmark
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
             TestVolatileIndexing.sameUnitPricePLINQ(products);
+            
 
 /**/
 
