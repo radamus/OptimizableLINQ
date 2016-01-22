@@ -35,13 +35,13 @@ namespace LINQConverters
             Trace.WriteLine(orgQuery.Expression.ToString());
 
             watch.Restart();
-            var q = orgQuery.Count();
+            var q = orgQuery.CountUsingInterator();
             watch.Stop();
             Trace.WriteLine("*** Unoptimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q);
 
             watch.Restart();
-            q = orgQuery.Count();
+            q = orgQuery.CountUsingInterator();
             watch.Stop();
             Trace.WriteLine("*** 2nd run: Unoptimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q);
@@ -57,13 +57,13 @@ namespace LINQConverters
             Trace.WriteLine(new Rewriter().Optimize(orgQuery.Expression).ToString());
 
             watch.Restart();
-            var q1 = optQuery.Count();
+            var q1 = optQuery.CountUsingInterator();
             watch.Stop();
             Trace.WriteLine("* Optimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q1);
             
             watch.Restart();
-            q1 = optQuery.Count();
+            q1 = optQuery.CountUsingInterator();
             watch.Stop();
             Trace.WriteLine("* 2nd run: Optimized query stopwatch: " + watch.ElapsedMilliseconds + " (" + watch.Elapsed + ")");
             Trace.WriteLine(q1);

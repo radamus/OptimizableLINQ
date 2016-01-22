@@ -32,7 +32,7 @@ namespace OptimizableLINQBenchmark
 
         public int ResultCRC(IEnumerable query)
         {
-            return query.CountElements();
+            return query.CountUsingInterator();
         }
 
     }
@@ -53,7 +53,7 @@ namespace OptimizableLINQBenchmark
 
         public int ResultCRC(Func<IEnumerable> query)
         {
-            return query.Invoke().CountElements();
+            return query.Invoke().CountUsingInterator();
         }
 
     }

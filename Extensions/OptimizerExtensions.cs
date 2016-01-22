@@ -35,7 +35,7 @@ namespace OptimizableLINQ
 
     public static class OptimizerExtensions
     {
-        public static int CountElements(this IEnumerable source)
+        public static int CountUsingInterator(this IEnumerable source)
         {
             int res = 0;
             foreach (var item in source)
