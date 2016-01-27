@@ -54,15 +54,18 @@ namespace OptimizableLINQBenchmark
 
             SimplestTestingTest();
 
-            TestSuite2016.RunAll(products);
+//            TestSuite2015.RunAll(products);
+
 /*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);
             else
                 nessosFactoringOutTests(100);
-*/
+/**/
+                       
 //            FactoringOutTests();
-
+//            TestVolatileIndexing.nullSomeCategories(products);            
+            VolatileIndexTests();
 
 /**/
             Console.ReadLine();
@@ -121,6 +124,34 @@ namespace OptimizableLINQBenchmark
             TestFactoringOut.suspendedNessosPythagoreanTriplesOthersTest(n);
   
               /**/
+        }
+
+        private static void VolatileIndexTests()
+        {
+            TestVolatileIndexing.volatileIndexCreation(products);
+            
+            if (EVALUATE_ORIGINALS)
+            {
+                TestFactoringOut.singleExpressionOriginal(productsBy10);
+            }
+            TestVolatileIndexing.singleExpressionVolatileIndex(products);
+            TestVolatileIndexing.singleKeyExpressionVolatileIndex(products);
+
+            if (EVALUATE_ORIGINALS)
+            {
+                TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
+            }
+            TestVolatileIndexing.uniqueCategoryAlternatives(products);
+            TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
+            TestVolatileIndexing.uniqueCategoryPLINQ(products);
+
+            if (EVALUATE_ORIGINALS)
+            {
+                TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+            }
+            TestVolatileIndexing.sameUnitPriceAlternatives(products);
+            TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
+            TestVolatileIndexing.sameUnitPricePLINQ(products);
         }
     }
 }
