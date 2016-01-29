@@ -16,6 +16,7 @@ namespace OptimizableLINQBenchmark
         public const int NOOFREPEATS = 71;
         public const int MAX_TEST_TIME_MSEC = 10000;
         public const double MIN_TEST_TIME_MSEC = 0.025;
+        public const bool BREAK_LONG_TESTS = false;
 
         private static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         private static List<double> timeList = new List<double>();
@@ -58,7 +59,7 @@ namespace OptimizableLINQBenchmark
                 try
                 {
                     stats.Add(new SizeVsTimeStats(srcCount, executor.ResultCRC(query()), Test(query(), executor, noOfRepeats, maxTestTimeMsec, minTestTimeMsec)));
-                    if (stats.Count() > 1 && stats.Last().timeStats.noOfRepeats * 2 < stats.ElementAt(stats.Count() - 2).timeStats.noOfRepeats)
+                    if (BREAK_LONG_TESTS && stats.Count() > 1 && stats.Last().timeStats.noOfRepeats * 2 < stats.ElementAt(stats.Count() - 2).timeStats.noOfRepeats)
                         break;
                 }
                 catch (Exception e)

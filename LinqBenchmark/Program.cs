@@ -56,14 +56,14 @@ namespace OptimizableLINQBenchmark
 
 //            TestSuite2015.RunAll(products);
 
-/*
+
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);
             else
                 nessosFactoringOutTests(100);
 /**/
                        
-//            FactoringOutTests();
+            FactoringOutTests();
 //            TestVolatileIndexing.nullSomeCategories(products);            
             VolatileIndexTests();
 
@@ -139,7 +139,7 @@ namespace OptimizableLINQBenchmark
 
             if (EVALUATE_ORIGINALS)
             {
-                TestVolatileIndexing.uniqueCategoryQueryOriginal(products);
+                TestVolatileIndexing.uniqueCategoryQueryOriginal(productsBy10);
             }
             TestVolatileIndexing.uniqueCategoryAlternatives(products);
             TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
@@ -147,7 +147,7 @@ namespace OptimizableLINQBenchmark
 
             if (EVALUATE_ORIGINALS)
             {
-                TestVolatileIndexing.sameUnitPriceQueryOriginal(products);
+                TestVolatileIndexing.sameUnitPriceQueryOriginal(productsBy10);
             }
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);
