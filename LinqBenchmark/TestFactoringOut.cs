@@ -49,6 +49,12 @@ namespace OptimizableLINQBenchmark
         public static void suspendedInnerQueryTest(IEnumerable<Product> products)
         {
 
+            TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToMaterializable()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
+                               ref products,
+                               "Optimized Ikura With AsGroupSuspendedSelectMany operator using Materializable",
+                               "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToMaterializable()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               );
+
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Func",

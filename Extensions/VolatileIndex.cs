@@ -36,7 +36,7 @@ namespace OptimizableLINQ
         // Lookup does not promise to preserve elements order (but currently it does)
         private ILookup<TKey, TElement> validKeysLookup;
 
-        public IEnumerable<TElement> lookup(Func<TKey> criterion)
+        public IEnumerable<TElement> Lookup(Func<TKey> criterion)
         {
             TKey criterionValue;
 
@@ -68,25 +68,44 @@ namespace OptimizableLINQ
             }
 
             RelaxedVolatileIndex<TKey, TElement> index = new RelaxedVolatileIndex<TKey, TElement>();
-            
-            index.validKeysLookup = source.Where(element =>
+
+            int elementsCount = 0;
+            try
             {
-                try
+                index.validKeysLookup = source.Where(element =>
                 {
-                    keySelector(element);
-                    return true;
-                }
-                catch (Exception e)
+                    elementsCount++;
+                    try
+                    {
+                        keySelector(element);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
+                }).ToLookup(keySelector);
+            } catch (Exception e) {
+                index.validKeysLookup = source.Take(elementsCount).Where(element =>
                 {
-                    return false;
-                }
-            }).ToLookup(keySelector);
+                    try
+                    {
+                        keySelector(element);
+                        return true;
+                    }
+                    catch (Exception e2)
+                    {
+                        return false;
+                    }
+                }).ToLookup(keySelector);
+            }
 
             return index;
         }
     }
-
-    // Used correctly preserves all exceptions occuring in original query
+    
+    // Used correctly preserves exception thrown occuring in original query
+    // LIMITATIONS: Use only for finite data sources.
     public class VolatileIndex<TKey, TElement>
     {
         // Lookup does not promise to preserve elements order (but currently it does)
@@ -98,85 +117,45 @@ namespace OptimizableLINQ
 
         private IEnumerable<TElement> source;
 
-        // for predicates: criterion.Equals(p.key)
-        public IEnumerable<TElement> lookupKeyEquals(Func<TKey> criterion) // keyOperandBeforeCriterion == false
-        {
-            if (!source.Any())
-                return EmptyEnumerable<TElement>.Instance;
-            
-            TKey criterionValue;
-
-            try
-            {
-                criterionValue = criterion();   // firstly exception may occur while evaluation of criterion
-                keySelector(source.First());    // secondly exception may occur while evaluation of key operand
-                criterionValue.Equals(null);    // thirdly exception is thrown if criterion is null (binding an operator)
-            }
-            catch (Exception e)
-            {
-                throw e;                
-            }
-
-            if (firstOccuringKeyValueException != null)
-                throw firstOccuringKeyValueException;
-
-            return validKeysLookup[criterionValue];
-        }
-
-        // for predicates: p.key.Equals(criterion)
-        public IEnumerable<TElement> lookupEqualsKey(Func<TKey> criterion) // keyOperandBeforeCriterion == true
-        {
-            if (!source.Any())
-                return EmptyEnumerable<TElement>.Instance;
-            
-            TKey criterionValue;
-
-            try
-            {
-                criterionValue = criterion(); // secondly exception may occur while evaluation of criterion
-            }
-            catch (Exception e)
-            {
-                keySelector(source.First()); // firstly exception may occur while evaluation of key operand
-                throw e;
-            }
-
-            if (firstOccuringKeyValueException != null)
-                throw firstOccuringKeyValueException;
-
-            return validKeysLookup[criterionValue];
-        }
-
-        public IEnumerable<TElement> lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion)
+        public IEnumerable<TElement> Lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion, bool nonStaticEquals)
         {
             TKey criterionValue;
 
             try
             {
-                criterionValue = criterion();
+                criterionValue = criterion(); // exception may occur while evaluation of criterion
+                if (nonStaticEquals && !keyOperandBeforeCriterion && criterionValue == null)
+                    criterionValue.Equals(null);    // finally exception can be thrown if criterion is null (binding an operator)
             }
             catch (Exception e)
             {
                 if (source.Any())
                 {
+                    TElement firstElement = source.First(); // Firstly exception can be thrown by data source.
                     if (keyOperandBeforeCriterion)
-                        keySelector(source.First());
-                    throw e;
+                        keySelector(firstElement); //if keyOperandBeforeCriterion then secondly exception can be thrown by keySelector
+                    throw e; // finally exception comes from criterion evaluation or calling equals method on null criterionValue
                 }
                 return EmptyEnumerable<TElement>.Instance;
             }
 
             if (firstOccuringKeyValueException != null)
-                throw firstOccuringKeyValueException;
+                return GetKeyValueExceptionEndedEnumerable(criterionValue); // if other exceptions are probable they be handled here
                 
             return validKeysLookup[criterionValue];
+        }
+
+        private IEnumerable<TElement> GetKeyValueExceptionEndedEnumerable(TKey criterionValue) {
+            foreach (TElement element in validKeysLookup[criterionValue])
+                yield return element;
+            throw firstOccuringKeyValueException;
         }
 
         private VolatileIndex()
         {
         }
 
-        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector)
+        internal static VolatileIndex<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, bool nonStaticEqualsOnKeyOperand)
         {
             if (source == null)
             {
@@ -191,20 +170,30 @@ namespace OptimizableLINQ
             index.source = source;
             index.keySelector = keySelector;
 
-            index.validKeysLookup = source.Where(element =>
+            int validElementsCount = 0;
+
+            try
             {
-                try
+                index.validKeysLookup = source.TakeWhile(element =>
                 {
-                    keySelector(element).Equals(null); // firstly exception may occur while evaluation of key operand, secondly (assuming criterion is ok) if it is null 
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    if (index.firstOccuringKeyValueException == null)
+                    try
+                    {
+                        TKey keyValue = keySelector(element); // firstly exception may occur while evaluation of key operand, 
+                        if (nonStaticEqualsOnKeyOperand)
+                            keyValue.Equals(null); // secondly (assuming criterion is ok) if it is null 
+                        validElementsCount++;
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
                         index.firstOccuringKeyValueException = e;
-                    return false;
-                }
-            }).ToLookup(keySelector);
+                        return false;
+                    }
+                }).ToLookup(keySelector);
+            } catch (Exception e) {
+                index.validKeysLookup = source.Take(validElementsCount).ToLookup(keySelector);
+                index.firstOccuringKeyValueException = e;
+            }
 
             return index;
         }
@@ -223,7 +212,7 @@ namespace OptimizableLINQ
 
         private IEnumerable<TElement> source;
 
-        public IEnumerable<TElement> lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion, Func<TElement, bool> precedingPredicates = null)
+        public IEnumerable<TElement> Lookup(Func<TKey> criterion, bool keyOperandBeforeCriterion, Func<TElement, bool> precedingPredicates = null)
         {
             TKey criterionValue;
 

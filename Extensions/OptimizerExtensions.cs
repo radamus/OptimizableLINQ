@@ -33,6 +33,42 @@ namespace OptimizableLINQ
         }
     }
 
+    internal class Materializable<TSource>: IEnumerable<TSource>
+    {
+        private IEnumerator<TSource> sourceEnumerator;
+        private List<TSource> materializedSource = new List<TSource>(7);
+        private bool sourceConsumed = false;
+
+        internal Materializable(IEnumerable<TSource> source) {
+            sourceEnumerator = source.GetEnumerator();
+        }
+
+        public IEnumerator<TSource> GetEnumerator()
+        {
+            if (sourceConsumed)
+                return materializedSource.GetEnumerator();
+
+            return GetMaterializableEumerator();
+        }
+
+        private IEnumerator<TSource> GetMaterializableEumerator() {
+            foreach (TSource element in materializedSource)
+                yield return element;
+
+            while (sourceEnumerator.MoveNext())
+            {
+                materializedSource.Add(sourceEnumerator.Current);
+                yield return sourceEnumerator.Current;
+            }
+            sourceConsumed = true;
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
     public static class OptimizerExtensions
     {
         public static int CountUsingInterator(this IEnumerable source)
@@ -90,6 +126,10 @@ namespace OptimizableLINQ
             yield return source.ToList();
         }
 
+        public static IEnumerable<TSource> ToMaterializable<TSource>(this IEnumerable<TSource> source) {
+            return new Materializable<TSource>(source);
+        }
+
         // For optimization relaxed in preseriving semantics with regard to unintended side-effects (i.e. ignoring some exceptions)
         public static RelaxedVolatileIndex<TKey, TSource> ToRelaxedVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
@@ -102,9 +142,9 @@ namespace OptimizableLINQ
             return PartlyRelaxedVolatileIndex<TKey, TSource>.Create(source, keySelector);
         }
 
-        public static VolatileIndex<TKey, TSource> ToVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        public static VolatileIndex<TKey, TSource> ToVolatileIndex<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, bool nonStaticEqualsOnKeyOperand = false)
         {
-            return VolatileIndex<TKey, TSource>.Create(source, keySelector);
+            return VolatileIndex<TKey, TSource>.Create(source, keySelector, nonStaticEqualsOnKeyOperand);
         }
 
         // DEPRECATED

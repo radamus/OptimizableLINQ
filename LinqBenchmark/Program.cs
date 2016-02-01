@@ -56,14 +56,17 @@ namespace OptimizableLINQBenchmark
 
 //            TestSuite2015.RunAll(products);
 
-
+/*
             if (TestingEnvironment.EXTENDED_DATA)
                 nessosFactoringOutTests(10000);
             else
                 nessosFactoringOutTests(100);
 /**/
-                       
-            FactoringOutTests();
+
+//            TestVolatileIndexing.sameUnitPriceVolatileIndexExceptionsTest(products);
+//            TestVolatileIndexing.singleExpressionVolatileIndex(products);
+       
+//            FactoringOutTests();
 //            TestVolatileIndexing.nullSomeCategories(products);            
             VolatileIndexTests();
 
