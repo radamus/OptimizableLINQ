@@ -13,7 +13,7 @@ namespace OptimizableLINQBenchmark
 
     class Program
     {
-        public const bool EVALUATE_ORIGINALS = true;
+        public const bool EVALUATE_ORIGINALS = false;
 
         public static ICollection<Product> products;
         public static ICollection<Product> productsBy10;
@@ -143,6 +143,7 @@ namespace OptimizableLINQBenchmark
             if (EVALUATE_ORIGINALS)
             {
                 TestVolatileIndexing.uniqueCategoryQueryOriginal(productsBy10);
+                TestVolatileIndexing.uniqueCategoryOriginalPLINQ(productsBy10);
             }
             TestVolatileIndexing.uniqueCategoryAlternatives(products);
             TestVolatileIndexing.uniqueCategoryVolatileIndex(products);
@@ -151,6 +152,7 @@ namespace OptimizableLINQBenchmark
             if (EVALUATE_ORIGINALS)
             {
                 TestVolatileIndexing.sameUnitPriceQueryOriginal(productsBy10);
+                TestVolatileIndexing.sameUnitPriceOriginalPLINQ(productsBy10);
             }
             TestVolatileIndexing.sameUnitPriceAlternatives(products);
             TestVolatileIndexing.sameUnitPriceVolatileIndex(products);

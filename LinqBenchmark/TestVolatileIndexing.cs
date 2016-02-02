@@ -118,14 +118,17 @@ namespace OptimizableLINQBenchmark
                            );
         }
 
-        public static void uniqueCategoryPLINQ(IEnumerable<Product> products)
+        public static void uniqueCategoryOriginalPLINQ(IEnumerable<Product> products)
         {
             TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => products.Where(p2 => p.category.Equals(p2.category)).Count() == 1).Select(p => p.productName),
                            ref products,
                            "Original Unique category Lambda Expession with PLINQ",
                            "products.AsParallel().Where(p => products.Where(p2 => p.category.Equals(p2.category)).Count() == 1).Select(p => p.productName)"
                            );
+        }
 
+        public static void uniqueCategoryPLINQ(IEnumerable<Product> products)
+        {
             TestingEnvironment.BenchmarkQuery(() => products.AsParallel().GroupBy(p => p.category).Where(prodGroup => prodGroup.Count() == 1).SelectMany(prodGroup => prodGroup.Select(p => p.productName)),
                            ref products,
                            "GroupBy alternative Unique category (==) Lambda Expession with PLINQ",
@@ -312,16 +315,17 @@ namespace OptimizableLINQBenchmark
             products.Take(indexOfSndCorrelatedProduct).Last().productName = nulledProductName;
         }
 
-
-
-        public static void sameUnitPricePLINQ(IEnumerable<Product> products)
+        public static void sameUnitPriceOriginalPLINQ(IEnumerable<Product> products)
         {
             TestingEnvironment.BenchmarkQuery(() => products.AsParallel().Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + " and " + p2.productName)),
                        ref products,
                        "Original Same unitPrice Lambda Expession with PLINQ",
                        "products.AsParallel().Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => products.Where(p2 => !p2.category.Equals(p.category) && p2.unitPrice == p.unitPrice).Select(p2 => p.productName + \" and \" + p2.productName))"
                        );
+        }
 
+        public static void sameUnitPricePLINQ(IEnumerable<Product> products)
+        {
             TestingEnvironment.BenchmarkQuery(() => products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
                            ref products,
                            "Groupby Same unitPrice Lambda Expession with PLINQ",
