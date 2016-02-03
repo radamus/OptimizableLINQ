@@ -92,7 +92,7 @@ namespace OptimizableLINQBenchmark
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupEager(() => products.ToLookup(p => p.category)).SelectMany(pLookup => products.Where(p => pLookup[p.category].Count() == 1).Select(p => p.productName)),
                            ref products,
-                           "ToLookup alternative Unique unitPrice (==) Lambda Expession",
+                           "ToLookup alternative Unique category (==) Lambda Expession",
                            "OptimizerExtensions.AsGroup(() => products.ToLookup(p => p.category)).SelectMany(pLookup => products.Where(p => pLookup[p.category].Count() == 1).Select(p => p.productName))"
                            );
         }
@@ -133,6 +133,12 @@ namespace OptimizableLINQBenchmark
                            ref products,
                            "GroupBy alternative Unique category (==) Lambda Expession with PLINQ",
                            "products.AsParallel().GroupBy(p => p.category).Where(prodGroup => prodGroup.Count() == 1).SelectMany(prodGroup => prodGroup.Select(p=> p.productName)"
+                           );
+
+            TestingEnvironment.BenchmarkQuery(() => products.AsParallel().GroupBy(p => p.category).AsParallel().Where(prodGroup => prodGroup.Count() == 1).SelectMany(prodGroup => prodGroup.Select(p => p.productName)),
+                           ref products,
+                           "GroupBy alternative Unique category (==) Lambda Expession with PLINQv2",
+                           "products.AsParallel().GroupBy(p => p.category).AsParallel().Where(prodGroup => prodGroup.Count() == 1).SelectMany(prodGroup => prodGroup.Select(p=> p.productName)"
                            );
 
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToVolatileIndex(p => p.category)).SelectMany(prodCatIdxThunk => products.AsParallel().Where(p => prodCatIdxThunk.Value.Lookup(() => p.category, false, true).Count() == 1).Select(p => p.productName)),
@@ -332,6 +338,12 @@ namespace OptimizableLINQBenchmark
                            "products.AsParallel().GroupBy(p => p.unitPrice).SelectMany(prodGroup => prodGroup.Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
                            );
 
+            TestingEnvironment.BenchmarkQuery(() => products.GroupBy(p => p.unitPrice).AsParallel().SelectMany(prodGroup => prodGroup.Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
+                           ref products,
+                           "Groupby Same unitPrice Lambda Expession with PLINQv2",
+                           "products.GroupBy(p => p.unitPrice).AsParallel().SelectMany(prodGroup => prodGroup.Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => prodGroup.Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + \" and \" + p2.productName)))"
+                           );
+
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroupSuspendedThreadSafe(() => products.ToRelaxedVolatileIndex(p => p.unitPrice)).SelectMany(prodPriceIdxThunk => products.AsParallel().Where(p => categoriesToAudit.Contains(p.category)).SelectMany(p => prodPriceIdxThunk.Value.Lookup(() => p.unitPrice).Where(p2 => !p2.category.Equals(p.category)).Select(p2 => p.productName + " and " + p2.productName))),
                            ref products,
                            "Relaxed (Exception Ignoring) Volatile Index Same unitPrice Lambda Expession with PLINQ",
@@ -374,5 +386,6 @@ namespace OptimizableLINQBenchmark
                             "OptimizerExtensions.AsGroup(() => products.ToVolatileIndex(p2 => Math.Round(p2.unitPrice / 1.2, 2)).SelectMany(prodPriceIdxThunk => products.Where(p => prodPriceIdxThunk.Value.Lookup(() => p.unitPrice, false, false).Any()).Select(p => p.productName))"
                             );
         }
+
     }
 }
