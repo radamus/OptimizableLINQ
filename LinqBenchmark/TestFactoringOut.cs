@@ -9,6 +9,7 @@ namespace OptimizableLINQBenchmark
 {
     using SampleData;
     using OptimizableLINQ;
+    using System.Linq.Expressions;
 
     public static class TestFactoringOut
     {
@@ -49,24 +50,46 @@ namespace OptimizableLINQBenchmark
         public static void suspendedInnerQueryTest(IEnumerable<Product> products)
         {
 
+            // THE SAFEST VARIANT (CORRECT IN CASE OF INFINITE DATA SOURCES)
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToMaterializable()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Materializable",
                                "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToMaterializable()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
 
+            // "A STEP TOWARDS..." VARIANT (EXAPMLE 1)
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Func",
                                "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
             
+            // THE FASTESTS AND SEEMS CORRECT (BUT IKURA QUERY HAS BEEN FACTORED OUT FROM INNER LAMBDA, IS IT REALLY SAFE?)
+            // TODO: IF CORRECT IMPLEMENT VARIANT BASED ON ToMaterializable()
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)),
                                ref products,
                                "Optimized Ikura With AsGroupSuspendedSelectMany operator using Enumerable",
                                "OptimizerExtensions.AsGroup(products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice)).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
                                );
+        }
 
+        public static void autoInnerQueryTest(IEnumerable<Product> products)
+        {
+/*            Func<IEnumerable<string>> func = Expression.Lambda<Func<IEnumerable<string>>>(OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == "Ikura").Select(p2 => p2.unitPrice).ToList()).AsQueryable().SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName)).Expression).Compile();
+
+            TestingEnvironment.BenchmarkQuery(func,
+                               ref products,
+                               "Optimized Ikura With AsGroupSuspendedSelectMany operator using Func (ARTIFICIALY COMPILED)",
+                               "OptimizerExtensions.AsGroup(() => products.Where(p2 => p2.productName == \"Ikura\").Select(p2 => p2.unitPrice).ToList()).SelectMany(uThunk => products.Where(p => uThunk.Value.Contains(p.unitPrice)).Select(p => p.productName))"
+                               );*/
+            
+            TestingEnvironment.BenchmarkQuery(() => from Product p in products.AsOptimizable()
+                                                    where (from Product p2 in products where p2.productName == "Ikura" select p2.unitPrice).Contains(p.unitPrice)
+                                                    select p.productName,
+                           ref products,
+                           "AsOptimizable Ikura Query Expession",
+                           "from Product p in products.AsOptimizable()\n where (from Product p2 in products where p2.productName == \"Ikura\" select p2.unitPrice).Contains(p.unitPrice)\nselect p.productName"
+                           );
 
         }
 
@@ -173,11 +196,29 @@ namespace OptimizableLINQBenchmark
         }
 
         public static void suspendedSingleResultTest(IEnumerable<Product> products)
-        {
+        {   
             TestingEnvironment.BenchmarkQuery(() => OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName)),
                                ref products,
                                "Optimized Max With AsGroupSuspendedSelectMany operator",
                                "OptimizerExtensions.AsGroup(() => products.Select(p2 => p2.unitPrice).Max()).SelectMany(uMaxThunk => products.Where(p => uMaxThunk.Value == p.unitPrice).Select(p => p.productName))"
+                               );
+
+        }
+
+        public static void autoSingleResultTest(IEnumerable<Product> products)
+        {
+            TestingEnvironment.BenchmarkQuery(() => from Product p in products.AsOptimizable()
+                                                  where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice
+                                                  select p.productName,
+                            ref products,
+                            "AsOptimizable Max Query Expession",
+                            "from Product p in products.AsOptimizable()\n where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice\nselect p.productName"
+                            );
+
+            TestingEnvironment.BenchmarkQuery(() => products.Select(p2 => p2.unitPrice).GroupBy(key => 0).Select(pg => pg.Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName)),
+                               ref products,
+                               "Optimized Max With GroupBy operator",
+                               "products.Select(p2 => p2.unitPrice).GroupBy(key => 0).Select(pg => pg.Max()).SelectMany(uMax => products.Where(p => uMax == p.unitPrice).Select(p => p.productName))"
                                );
 
         }

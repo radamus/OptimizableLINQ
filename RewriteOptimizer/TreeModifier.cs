@@ -15,7 +15,7 @@ namespace OptimizableLINQ
         internal Expression Push(Expression pushable, Expression pushBefore, Expression query)
         {
 
-            Expression pushed = this.CreatePushedExpression(pushable, pushBefore);
+            Expression pushed = this.CreatePushedExpressionUsingGroupBy(pushable, pushBefore);
             query = new TreeNodeReplacer().Replace(query, pushBefore, pushed);
             return query;
         }
@@ -23,7 +23,7 @@ namespace OptimizableLINQ
         
 
 
-        MethodCallExpression CreatePushedExpression(Expression pushable, Expression pushedBefore)
+        MethodCallExpression CreatePushedExpressionUsingGroupBy(Expression pushable, Expression pushedBefore)
         {
             TreeNodeReplacer replacer = new TreeNodeReplacer();
             List<Expression> separated = Separate(pushable);
@@ -42,6 +42,34 @@ namespace OptimizableLINQ
 
             ParameterExpression aux = Expression.Parameter(subexpr.Type.GetGenericArguments()[0],makeAuxName());
             foreach(Expression part in parts)
+            {
+                subexpr = generateSelectMany(generateGroupBy(part, auxs.Peek().Type.GetGenericArguments()[1]), subexpr, auxs.Pop());
+            }
+
+            return generateSelectMany(subexpr, replacer.Replace(pushedBefore, pushable, aux), aux);
+
+        }
+
+        MethodCallExpression CreatePushedExpressionUsingAsGroup(Expression pushable, Expression pushedBefore)
+        {
+            TreeNodeReplacer replacer = new TreeNodeReplacer();
+            List<Expression> separated = Separate(pushable);
+            Stack<Expression> parts = new Stack<Expression>();
+            Stack<ParameterExpression> auxs = new Stack<ParameterExpression>();
+            Expression replaced = pushable;
+            foreach (Expression s in separated)
+            {
+
+                parts.Push(s);
+                auxs.Push(Expression.Parameter(typeof(IGrouping<,>).MakeGenericType(typeof(int), parts.Peek().Type.GetGenericArguments()[0]), makeAuxName()));
+
+                replaced = replacer.Replace(replaced, parts.Peek(), auxs.Peek());
+            }
+
+            Expression subexpr = generateSelect(generateGroupBy(parts.Pop(), auxs.Peek().Type.GetGenericArguments()[1]), replaced, auxs.Pop());
+
+            ParameterExpression aux = Expression.Parameter(subexpr.Type.GetGenericArguments()[0], makeAuxName());
+            foreach (Expression part in parts)
             {
                 subexpr = generateSelectMany(generateGroupBy(part, auxs.Peek().Type.GetGenericArguments()[1]), subexpr, auxs.Pop());
             }

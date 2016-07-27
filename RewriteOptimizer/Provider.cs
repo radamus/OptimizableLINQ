@@ -45,11 +45,13 @@ namespace OptimizableLINQ
             {
                 return wrappedProvider.Execute<TResult>(result);
             }
-            
-            Func<TResult> func = Expression.Lambda<Func<TResult>>(result).Compile();
+
+            LambdaModifier lm = new LambdaModifier();
+            var result2 = lm.Modify((Expression) result);
+
+            Func<TResult> func = Expression.Lambda<Func<TResult>>(result2).Compile();
             
             return func();
-
         }
 
         object IQueryProvider.Execute(System.Linq.Expressions.Expression expression)
@@ -60,8 +62,11 @@ namespace OptimizableLINQ
             {
                 return wrappedProvider.Execute(result);
             }
-            
-            return Expression.Lambda(result).Compile().DynamicInvoke();
+
+            LambdaModifier lm = new LambdaModifier();
+            var result2 = lm.Modify((Expression) result);
+
+            return Expression.Lambda(result2).Compile().DynamicInvoke();
 
         }
 
@@ -136,5 +141,55 @@ namespace OptimizableLINQ
             return enumerable.GetEnumerator();
         }
 
+    }
+
+    public class LambdaModifier : ExpressionVisitor
+    {
+        public Expression Modify(Expression expression)
+        {
+            return Visit(expression);
+        }
+
+  /*      protected override Expression VisitLambda<T>(Expression<T> e)
+        {
+            LambdaExpression lambda = (LambdaExpression) e;
+            Expression body = this.Visit(lambda.Body);            
+            LambdaExpression l = Expression.Lambda(lambda.Type, body, lambda.Parameters);
+            var compiled = l.Compile();
+            Expression c = Expression.Constant(compiled);
+            return c;
+        }/**/
+        
+        protected override Expression VisitMethodCall(MethodCallExpression mce)
+                {
+                    bool hasLambdas = false;
+            
+                    IList<Expression> args = new List<Expression>();
+                    foreach(Expression e in mce.Arguments) {
+
+                        if (e.NodeType == ExpressionType.Quote)
+                        {
+                            UnaryExpression u = (UnaryExpression) this.Visit(e);
+                            args.Add(this.Visit(e));
+                        } else if (e.NodeType == ExpressionType.Lambda)
+                        {
+                            LambdaExpression l = (LambdaExpression) this.Visit(e);
+                            Expression c = Expression.Constant(l.Compile());
+                            args.Add(c);
+
+                            hasLambdas = true;
+                        }
+                        else
+                            args.Add(this.Visit(e));
+                    
+                    }
+
+                    if (hasLambdas)
+                    {
+                        return Expression.Call(mce.Method, args);
+                    }
+            
+                    return base.VisitMethodCall(mce);
+                }/**/
     }
 }

@@ -48,7 +48,12 @@ namespace OptimizableLINQBenchmark
 
         public static void MaxPriceAsProblemRuntime(ICollection<Product> products)
         {
+            Console.WriteLine("* * * MAX PRICE AS PROBLEM - RUNTIME * * *");
 
+            TestingEnvironment.BenchmarkOptimisations((productsSrc) => from Product p in productsSrc
+                                                                       where (from Product p2 in products select p2.unitPrice).Max() == p.unitPrice
+                                                                       select p.productName, ref products,
+                new OptimizationApplicator[] { new OptimizableLINQApplicator() }, "MaxPrice problem");
         }
 
         public static void PromoProductsProblemCompiled(IEnumerable<Product> products)
